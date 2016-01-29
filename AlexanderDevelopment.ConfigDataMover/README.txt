@@ -2,7 +2,7 @@
 This is a tool used for making sure that configuration data like teams and queues have the same record GUIDs in all of a Dynamics CRM project's different environments for development, testing and production. For more information, please see these posts on my blog: 
 
 1. [Introducing the Alexander Development Dynamics CRM Configuration Data Mover](http://alexanderdevelopment.net/post/2015/11/11/introducing-the-dynamics-crm-configuration-data-mover)
-2. [Dynamics CRM Configuration Data Mover v1.5](http://alexanderdevelopment.net/post/2016/02/01/dynamics-crm-configuration-data-mover-v1-5/)
+2. [Dynamics CRM Configuration Data Mover v1.5](http://alexanderdevelopment.net/post/2016/01/29/dynamics-crm-configuration-data-mover-v1-5/)
 
 Here's an explanation of the various settings and parameters that can be specified in the GUI:
 

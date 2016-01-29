@@ -1,10 +1,13 @@
 # AlexanderDevelopment.ConfigDataMover
-This is a tool used for making sure that configuration data like teams and queues have the same record GUIDs in all of a Dynamics CRM project's different environments for development, testing and production. For more information, please see the introductory post on my blog at [http://alexanderdevelopment.net/post/2015/11/11/introducing-the-dynamics-crm-configuration-data-mover](http://alexanderdevelopment.net/post/2015/11/11/introducing-the-dynamics-crm-configuration-data-mover).
+This is a tool used for making sure that configuration data like teams and queues have the same record GUIDs in all of a Dynamics CRM project's different environments for development, testing and production. For more information, please see these posts on my blog: 
+
+1. [Introducing the Alexander Development Dynamics CRM Configuration Data Mover](http://alexanderdevelopment.net/post/2015/11/11/introducing-the-dynamics-crm-configuration-data-mover)
+1. [Dynamics CRM Configuration Data Mover v1.5](http://alexanderdevelopment.net/post/2016/02/01/dynamics-crm-configuration-data-mover-v1-5/)
 
 Here's an explanation of the various settings and parameters that can be specified in the GUI:
 
-1. Source - Simplified CRM connection string for source organization.
-1. Target - Simplified CRM connection string for target organization.
+1. Source - Simplified CRM connection string for source organization OR full path to source data file in the form of "FILE=C:\datadirectory\datafile.json."
+1. Target - Simplified CRM connection string for target organization OR full path to target data file in the form of "FILE=C:\datadirectory\datafile.json."
 1. Save connection details? - If checked, connection details should be saved in configuration file. Note, connection details are unencrypted.
 1. Map root business unit GUID? - If checked, the job will automatically change any GUID references from the source organization root business unit to the target organization root business unit.
 1. Map base currency GUID? - If checked, the job will automatically change any GUID references from the source organization base currency to the target organization base currency.

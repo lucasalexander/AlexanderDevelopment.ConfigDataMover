@@ -1,0 +1,9 @@
+<ConfigDataJob><JobConfig mapBuGuid="True" mapCurrencyGuid="True" /><JobSteps><Step updateOnly="False"><Name>teamtemplate</Name><Fetch>&lt;fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false"&gt;
+  &lt;entity name="teamtemplate"&gt;
+    &lt;attribute name="defaultaccessrightsmask" /&gt;
+    &lt;attribute name="description" /&gt;
+    &lt;attribute name="objecttypecode" /&gt;
+    &lt;attribute name="teamtemplateid" /&gt;
+    &lt;attribute name="teamtemplatename" /&gt;
+  &lt;/entity&gt;
+&lt;/fetch&gt;</Fetch></Step></JobSteps><GuidMappings /></ConfigDataJob>

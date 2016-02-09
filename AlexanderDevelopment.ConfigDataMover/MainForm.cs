@@ -26,6 +26,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Schema;
 using System.IO;
 using AlexanderDevelopment.ConfigDataMover.Lib;
 
@@ -41,6 +42,16 @@ namespace AlexanderDevelopment.ConfigDataMover
             InitializeComponent();
             stepListBox.DisplayMember = "StepName";
             _stepCounter = 0;
+        }
+
+        public void SetSource(string connectionString)
+        {
+            this.sourceTextBox.Text = connectionString;
+        }
+
+        public void SetTarget(string connectionString)
+        {
+            this.targetTextBox.Text = connectionString;
         }
 
         /// <summary>
@@ -385,7 +396,43 @@ namespace AlexanderDevelopment.ConfigDataMover
         /// <param name="e"></param>
         private void stepFetchTextBox_Leave(object sender, EventArgs e)
         {
-            UpdateStep();
+            //if fetchxml looks ok, update the step
+            if (isParseableXml())
+            {
+                UpdateStep();
+            }
+            else
+            {
+                //otherwise alert the user and set focus back on the inputbox
+                MessageBox.Show("Input could not be parsed as XML.");
+                this.stepFetchTextBox.Focus();
+            }
+        }
+
+        /// <summary>
+        /// tries to load the step fetchxml as an xmldocument just to make sure it's well-formed xml - does not actually validate the fetchxml schema
+        /// </summary>
+        /// <returns></returns>
+        bool isParseableXml()
+        {
+            //only validate if the textbox is not null, empty or full of whitespace
+            if (!string.IsNullOrWhiteSpace(this.stepFetchTextBox.Text))
+            {
+                try
+                {
+                    XmlDocument document = new XmlDocument();
+                    document.LoadXml(this.stepFetchTextBox.Text);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return true;
+            }
         }
 
         /// <summary>
@@ -535,6 +582,12 @@ namespace AlexanderDevelopment.ConfigDataMover
         /// <param name="e"></param>
         private void runButton_Click(object sender, EventArgs e)
         {
+            DialogResult result = MessageBox.Show("Are you sure you want to run this job?", "Confirm run job", MessageBoxButtons.OKCancel);
+            if(result==DialogResult.Cancel)
+            {
+                return;
+            }
+
             //do some basic validations
             if (string.IsNullOrEmpty(sourceTextBox.Text))
             {
@@ -623,6 +676,24 @@ namespace AlexanderDevelopment.ConfigDataMover
         {
             About aboutWindow = new About();
             aboutWindow.Show();
+        }
+
+        private void editSourceButton_Click(object sender, EventArgs e)
+        {
+            SetConnection connectionForm = new SetConnection(this.sourceTextBox.Text, true);
+            connectionForm.ShowDialog(this);
+        }
+
+        private void editTargetButton_Click(object sender, EventArgs e)
+        {
+            SetConnection connectionForm = new SetConnection(this.targetTextBox.Text, false);
+            connectionForm.ShowDialog(this);
+        }
+
+        private void checkForUpdatesButton_Click(object sender, EventArgs e)
+        {
+            CheckLatestVersion checkVersion = new CheckLatestVersion();
+            checkVersion.ShowDialog(this);
         }
     }
 }

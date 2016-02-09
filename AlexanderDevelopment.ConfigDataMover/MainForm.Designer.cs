@@ -51,6 +51,8 @@
             this.clearMappingsButton = new System.Windows.Forms.Button();
             this.removeMappingButton = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.editTargetButton = new System.Windows.Forms.Button();
+            this.editSourceButton = new System.Windows.Forms.Button();
             this.saveConnectionsCheckBox = new System.Windows.Forms.CheckBox();
             this.targetLabel = new System.Windows.Forms.Label();
             this.sourceLabel = new System.Windows.Forms.Label();
@@ -59,11 +61,15 @@
             this.formStatusStrip = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripLoadButton = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSaveButton = new System.Windows.Forms.ToolStripButton();
+            this.fileButton = new System.Windows.Forms.ToolStripDropDownButton();
+            this.loadJobToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveJobToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripRunButton = new System.Windows.Forms.ToolStripButton();
-            this.toolStripAboutButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.helpButton = new System.Windows.Forms.ToolStripDropDownButton();
+            this.checkForUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stepDetailGroupBox.SuspendLayout();
             this.stepsGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.guidMappingGridView)).BeginInit();
@@ -288,6 +294,8 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.editTargetButton);
+            this.groupBox2.Controls.Add(this.editSourceButton);
             this.groupBox2.Controls.Add(this.saveConnectionsCheckBox);
             this.groupBox2.Controls.Add(this.mapBuCheckBox);
             this.groupBox2.Controls.Add(this.targetLabel);
@@ -301,6 +309,26 @@
             this.groupBox2.TabIndex = 0;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Configuration data job details";
+            // 
+            // editTargetButton
+            // 
+            this.editTargetButton.Location = new System.Drawing.Point(472, 48);
+            this.editTargetButton.Name = "editTargetButton";
+            this.editTargetButton.Size = new System.Drawing.Size(75, 23);
+            this.editTargetButton.TabIndex = 19;
+            this.editTargetButton.Text = "Edit";
+            this.editTargetButton.UseVisualStyleBackColor = true;
+            this.editTargetButton.Click += new System.EventHandler(this.editTargetButton_Click);
+            // 
+            // editSourceButton
+            // 
+            this.editSourceButton.Location = new System.Drawing.Point(472, 17);
+            this.editSourceButton.Name = "editSourceButton";
+            this.editSourceButton.Size = new System.Drawing.Size(75, 23);
+            this.editSourceButton.TabIndex = 16;
+            this.editSourceButton.Text = "Edit";
+            this.editSourceButton.UseVisualStyleBackColor = true;
+            this.editSourceButton.Click += new System.EventHandler(this.editSourceButton_Click);
             // 
             // saveConnectionsCheckBox
             // 
@@ -334,14 +362,14 @@
             // 
             this.targetTextBox.Location = new System.Drawing.Point(71, 48);
             this.targetTextBox.Name = "targetTextBox";
-            this.targetTextBox.Size = new System.Drawing.Size(490, 20);
+            this.targetTextBox.Size = new System.Drawing.Size(395, 20);
             this.targetTextBox.TabIndex = 18;
             // 
             // sourceTextBox
             // 
             this.sourceTextBox.Location = new System.Drawing.Point(71, 19);
             this.sourceTextBox.Name = "sourceTextBox";
-            this.sourceTextBox.Size = new System.Drawing.Size(490, 20);
+            this.sourceTextBox.Size = new System.Drawing.Size(395, 20);
             this.sourceTextBox.TabIndex = 15;
             // 
             // formStatusStrip
@@ -362,37 +390,49 @@
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLoadButton,
-            this.toolStripSaveButton,
+            this.fileButton,
+            this.toolStripSeparator2,
             this.toolStripRunButton,
             this.toolStripSeparator1,
-            this.toolStripAboutButton});
+            this.helpButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(590, 25);
-            this.toolStrip1.TabIndex = 152;
+            this.toolStrip1.TabIndex = 0;
+            this.toolStrip1.TabStop = true;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // toolStripLoadButton
+            // fileButton
             // 
-            this.toolStripLoadButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripLoadButton.Image = ((System.Drawing.Image)(resources.GetObject("toolStripLoadButton.Image")));
-            this.toolStripLoadButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripLoadButton.Name = "toolStripLoadButton";
-            this.toolStripLoadButton.Size = new System.Drawing.Size(57, 22);
-            this.toolStripLoadButton.Text = "Load job";
-            this.toolStripLoadButton.ToolTipText = "Load job";
-            this.toolStripLoadButton.Click += new System.EventHandler(this.loadJobButton_Click);
+            this.fileButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.fileButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.loadJobToolStripMenuItem,
+            this.saveJobToolStripMenuItem});
+            this.fileButton.Image = ((System.Drawing.Image)(resources.GetObject("fileButton.Image")));
+            this.fileButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.fileButton.Name = "fileButton";
+            this.fileButton.Size = new System.Drawing.Size(38, 22);
+            this.fileButton.Text = "File";
+            this.fileButton.ToolTipText = "File";
             // 
-            // toolStripSaveButton
+            // loadJobToolStripMenuItem
             // 
-            this.toolStripSaveButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripSaveButton.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSaveButton.Image")));
-            this.toolStripSaveButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripSaveButton.Name = "toolStripSaveButton";
-            this.toolStripSaveButton.Size = new System.Drawing.Size(55, 22);
-            this.toolStripSaveButton.Text = "Save job";
-            this.toolStripSaveButton.Click += new System.EventHandler(this.saveJobButton_Click);
+            this.loadJobToolStripMenuItem.Name = "loadJobToolStripMenuItem";
+            this.loadJobToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.loadJobToolStripMenuItem.Text = "Load job";
+            this.loadJobToolStripMenuItem.Click += new System.EventHandler(this.loadJobButton_Click);
+            // 
+            // saveJobToolStripMenuItem
+            // 
+            this.saveJobToolStripMenuItem.Name = "saveJobToolStripMenuItem";
+            this.saveJobToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveJobToolStripMenuItem.Text = "Save job";
+            this.saveJobToolStripMenuItem.Click += new System.EventHandler(this.saveJobButton_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
             // 
             // toolStripRunButton
             // 
@@ -404,20 +444,37 @@
             this.toolStripRunButton.Text = "Run job";
             this.toolStripRunButton.Click += new System.EventHandler(this.runButton_Click);
             // 
-            // toolStripAboutButton
-            // 
-            this.toolStripAboutButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripAboutButton.Image = ((System.Drawing.Image)(resources.GetObject("toolStripAboutButton.Image")));
-            this.toolStripAboutButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripAboutButton.Name = "toolStripAboutButton";
-            this.toolStripAboutButton.Size = new System.Drawing.Size(23, 22);
-            this.toolStripAboutButton.Text = "About";
-            this.toolStripAboutButton.Click += new System.EventHandler(this.toolStripAboutButton_Click);
-            // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // helpButton
+            // 
+            this.helpButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.checkForUpdatesToolStripMenuItem,
+            this.aboutToolStripMenuItem});
+            this.helpButton.Image = ((System.Drawing.Image)(resources.GetObject("helpButton.Image")));
+            this.helpButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.helpButton.Name = "helpButton";
+            this.helpButton.Size = new System.Drawing.Size(61, 22);
+            this.helpButton.Text = "Help";
+            // 
+            // checkForUpdatesToolStripMenuItem
+            // 
+            this.checkForUpdatesToolStripMenuItem.Name = "checkForUpdatesToolStripMenuItem";
+            this.checkForUpdatesToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+            this.checkForUpdatesToolStripMenuItem.Text = "Check for updates";
+            this.checkForUpdatesToolStripMenuItem.Click += new System.EventHandler(this.checkForUpdatesButton_Click);
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.aboutToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("aboutToolStripMenuItem.Image")));
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.toolStripAboutButton_Click);
             // 
             // MainForm
             // 
@@ -431,7 +488,9 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.stepsGroupBox);
             this.Controls.Add(this.stepDetailGroupBox);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "MainForm";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "Dynamics CRM Configuration Data Mover";
             this.stepDetailGroupBox.ResumeLayout(false);
             this.stepDetailGroupBox.PerformLayout();
@@ -480,11 +539,17 @@
         private System.Windows.Forms.StatusStrip formStatusStrip;
         private System.Windows.Forms.ToolStripStatusLabel statusLabel;
         private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripButton toolStripLoadButton;
-        private System.Windows.Forms.ToolStripButton toolStripSaveButton;
         private System.Windows.Forms.ToolStripButton toolStripRunButton;
-        private System.Windows.Forms.ToolStripButton toolStripAboutButton;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.Button editTargetButton;
+        private System.Windows.Forms.Button editSourceButton;
+        private System.Windows.Forms.ToolStripDropDownButton fileButton;
+        private System.Windows.Forms.ToolStripMenuItem loadJobToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveJobToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton helpButton;
+        private System.Windows.Forms.ToolStripMenuItem checkForUpdatesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     }
 }
 

@@ -130,7 +130,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                     String lines = sr.ReadToEnd();
                     JsonSerializerSettings settings = new JsonSerializerSettings();
                     settings.TypeNameHandling = TypeNameHandling.None;
-                    _savedSourceData = (ExportedData)JsonConvert.DeserializeObject<ExportedData>(lines,settings);
+                    _savedSourceData = (ExportedData)JsonConvert.DeserializeObject<ExportedData>(lines, settings);
                     LogMessage("INFO", "  source data deserialization complete");
 
                 }
@@ -138,6 +138,35 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             else
             {
                 _sourceConn = CrmConnection.Parse(SourceString);
+
+                //disable prompting for credentials
+                _sourceConn.ClientCredentials.SupportInteractive = false;
+
+                //validate login works
+                try
+                {
+                    using (OrganizationService service = new OrganizationService(_sourceConn))
+                    {
+                        string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                          <entity name='businessunit'>
+                            <attribute name='name' />
+                            <attribute name='businessunitid' />
+                          </entity>
+                        </fetch>";
+                        EntityCollection buEntities = service.RetrieveMultiple(new FetchExpression(testFetch));
+                        if (buEntities.Entities.Count < 1)
+                        {
+                            throw new Exception("Test query returned zero results.");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    string errormsg = string.Format(string.Format("Could not validate source connection: {0}", ex.Message));
+                    LogMessage("ERROR", errormsg);
+                    throw new InvalidOperationException(errormsg);
+                }
+
                 _isFileSource = false;
             }
 
@@ -152,6 +181,35 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             else
             {
                 _targetConn = CrmConnection.Parse(TargetString);
+
+                //disable prompting for credentials
+                _targetConn.ClientCredentials.SupportInteractive = false;
+
+                //validate login works
+                try
+                {
+                    using (OrganizationService service = new OrganizationService(_targetConn))
+                    {
+                        string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                          <entity name='businessunit'>
+                            <attribute name='name' />
+                            <attribute name='businessunitid' />
+                          </entity>
+                        </fetch>";
+                        EntityCollection buEntities = service.RetrieveMultiple(new FetchExpression(testFetch));
+                        if (buEntities.Entities.Count < 1)
+                        {
+                            throw new Exception("Test query returned zero results.");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    string errormsg = string.Format(string.Format("Could not validate target connection: {0}", ex.Message));
+                    LogMessage("ERROR", errormsg);
+                    throw new InvalidOperationException(errormsg);
+                }
+
                 _isFileTarget = false;
             }
         }
@@ -206,7 +264,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         {
                             string errormsg = string.Format(string.Format("could not retrieve source base business unit: {0}", ex.Message));
                             LogMessage("ERROR", errormsg);
-                            throw new Exception(errormsg);
+                            throw new InvalidOperationException(errormsg);
                         }
                     }
 
@@ -225,9 +283,9 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         }
                         catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
                         {
-                            string errormsg = string.Format(string.Format("could not source target base currency: {0}", ex.Message));
+                            string errormsg = string.Format(string.Format("could not retrieve source target base currency: {0}", ex.Message));
                             LogMessage("ERROR", errormsg);
-                            throw new Exception(errormsg);
+                            throw new InvalidOperationException(errormsg);
                         }
                     }
                 }
@@ -259,7 +317,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         {
                             string errormsg = string.Format("could not retrieve target base business unit: {0}", ex.Message);
                             LogMessage("ERROR", errormsg);
-                            throw new Exception(errormsg);
+                            throw new InvalidOperationException(errormsg);
                         }
                     }
 
@@ -280,7 +338,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         {
                             string errormsg = string.Format(string.Format("could not retrieve target base currency: {0}", ex.Message));
                             LogMessage("ERROR", errormsg);
-                            throw new Exception(errormsg);
+                            throw new InvalidOperationException(errormsg);
                         }
                     }
                 }

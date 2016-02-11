@@ -37,21 +37,50 @@ namespace AlexanderDevelopment.ConfigDataMover
         int _stepCounter;
         Importer _importer;
 
+        private string _source;
+        private string _target;
+
         public MainForm()
         {
             InitializeComponent();
             stepListBox.DisplayMember = "StepName";
             _stepCounter = 0;
+            _source = string.Empty;
+            _target = string.Empty;
         }
 
-        public void SetSource(string connectionString)
+        public void SetSource(string connectionstring)
         {
-            this.sourceTextBox.Text = connectionString;
+            this._source = connectionstring;
+            //this.sourceTextBox.Text = connectionstring;
+
+            var dict = Utility.ParseConnectionString(connectionstring);
+
+            if (dict.ContainsKey("FILE"))
+            {
+                this.sourceLabel.Text = dict["FILE"];
+            }
+            else if(dict.ContainsKey("URL"))
+            {
+                this.sourceLabel.Text = dict["URL"];
+            }
         }
 
-        public void SetTarget(string connectionString)
+        public void SetTarget(string connectionstring)
         {
-            this.targetTextBox.Text = connectionString;
+            this._target = connectionstring;
+            //this.targetTextBox.Text = connectionstring;
+
+            var dict = Utility.ParseConnectionString(connectionstring);
+
+            if (dict.ContainsKey("FILE"))
+            {
+                this.targetLabel.Text = dict["FILE"];
+            }
+            else if (dict.ContainsKey("URL"))
+            {
+                this.targetLabel.Text = dict["URL"];
+            }
         }
 
         /// <summary>
@@ -226,8 +255,10 @@ namespace AlexanderDevelopment.ConfigDataMover
                 if(saveConnectionsCheckBox.Checked)
                 {
                     XmlElement elConnection = (XmlElement)elRoot.AppendChild(doc.CreateElement("ConnectionDetails"));
-                    elConnection.SetAttribute("source", sourceTextBox.Text);
-                    elConnection.SetAttribute("target", targetTextBox.Text);
+                    //elConnection.SetAttribute("source", sourceTextBox.Text);
+                    //elConnection.SetAttribute("target", targetTextBox.Text);
+                    elConnection.SetAttribute("source", _source);
+                    elConnection.SetAttribute("target", _target);
                     elConnection.SetAttribute("save", "True");
                 }
 
@@ -261,8 +292,10 @@ namespace AlexanderDevelopment.ConfigDataMover
                     stepListBox.Items.Clear();
                     guidMappingGridView.Rows.Clear();
                     saveConnectionsCheckBox.Checked = false;
-                    sourceTextBox.Text = string.Empty;
-                    targetTextBox.Text = string.Empty;
+                    //sourceTextBox.Text = string.Empty;
+                    //targetTextBox.Text = string.Empty;
+                    _source = string.Empty;
+                    _target = string.Empty;
 
                     XmlNodeList stepList = xml.GetElementsByTagName("Step");
                     foreach (XmlNode xn in stepList)
@@ -290,8 +323,9 @@ namespace AlexanderDevelopment.ConfigDataMover
                     XmlNodeList connectionNodes = xml.GetElementsByTagName("ConnectionDetails");
                     if(connectionNodes.Count>0)
                     {
-                        sourceTextBox.Text = connectionNodes[0].Attributes["source"].Value;
-                        targetTextBox.Text = connectionNodes[0].Attributes["target"].Value;
+                        SetSource(connectionNodes[0].Attributes["source"].Value);
+                        SetTarget(connectionNodes[0].Attributes["target"].Value);
+
                         saveConnectionsCheckBox.Checked = Convert.ToBoolean(connectionNodes[0].Attributes["save"].Value);
                     }
                 }
@@ -558,20 +592,27 @@ namespace AlexanderDevelopment.ConfigDataMover
             //unsubscribe from the importer's progress updates
             _importer.OnProgressUpdate -= ImportStatusUpdate;
 
-            int errorCount = _importer.ErrorCount;
-
-            _importer = null;
-            //clear the status label
-            ImportStatusUpdate("");
-
-            //show a message to the user
-            if (errorCount == 0)
+            if (e.Error != null)
             {
-                MessageBox.Show("Job finished with no errors.");
+                MessageBox.Show(string.Format("An error prevented the job from executing: {0}", e.Error.ToString()),"Fatal job error",MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            else
-            {
-                MessageBox.Show("Job finished with errors. See the RecordError.log file for more details.");
+            else {
+                int errorCount = _importer.ErrorCount;
+
+                _importer = null;
+                //clear the status label
+                ImportStatusUpdate("");
+
+
+                //show a message to the user
+                if (errorCount == 0)
+                {
+                    MessageBox.Show("Job finished with no errors.","Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Job finished with errors. See the RecordError.log file for more details.", "Import errors", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -583,23 +624,23 @@ namespace AlexanderDevelopment.ConfigDataMover
         private void runButton_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show("Are you sure you want to run this job?", "Confirm run job", MessageBoxButtons.OKCancel);
-            if(result==DialogResult.Cancel)
+            if (result == DialogResult.Cancel)
             {
                 return;
             }
 
             //do some basic validations
-            if (string.IsNullOrEmpty(sourceTextBox.Text))
+            if (string.IsNullOrEmpty(_source))
             {
                 MessageBox.Show("no source connection specified");
                 return;
             }
-            if (string.IsNullOrEmpty(targetTextBox.Text))
+            if (string.IsNullOrEmpty(_target))
             {
                 MessageBox.Show("no target connection specified");
                 return;
             }
-            if (!(stepListBox.Items.Count>0))
+            if (!(stepListBox.Items.Count > 0))
             {
                 MessageBox.Show("no steps in job");
                 return;
@@ -634,18 +675,19 @@ namespace AlexanderDevelopment.ConfigDataMover
             _importer = new Importer();
             _importer.GuidMappings = mappings;
             _importer.JobSteps = steps;
-            _importer.SourceString = sourceTextBox.Text;
-            _importer.TargetString = targetTextBox.Text;
+            _importer.SourceString = _source;
+            _importer.TargetString = _target;
             _importer.MapBaseBu = mapBuCheckBox.Checked;
             _importer.MapBaseCurrency = mapCurrencyCheckBox.Checked;
 
             //subscribe to the importer object progress update event
             _importer.OnProgressUpdate += ImportStatusUpdate;
-            
+
             //set up and call the backgroundworker to do the CRM queries and writing
             var worker = new BackgroundWorker();
             worker.DoWork += WorkerDoWork;
             worker.RunWorkerCompleted += WorkerRunWorkerCompleted;
+
             worker.RunWorkerAsync();
         }
 
@@ -680,13 +722,13 @@ namespace AlexanderDevelopment.ConfigDataMover
 
         private void editSourceButton_Click(object sender, EventArgs e)
         {
-            SetConnection connectionForm = new SetConnection(this.sourceTextBox.Text, true);
+            SetConnection connectionForm = new SetConnection(_source, true);
             connectionForm.ShowDialog(this);
         }
 
         private void editTargetButton_Click(object sender, EventArgs e)
         {
-            SetConnection connectionForm = new SetConnection(this.targetTextBox.Text, false);
+            SetConnection connectionForm = new SetConnection(_target, false);
             connectionForm.ShowDialog(this);
         }
 

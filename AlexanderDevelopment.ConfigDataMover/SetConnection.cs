@@ -31,19 +31,7 @@ namespace AlexanderDevelopment.ConfigDataMover
             _isSource = isSource;
             if (!string.IsNullOrWhiteSpace(connectionstring))
             {
-                var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                var elements = connectionstring.Split(';');
-                foreach(var element in elements)
-                {
-                    if(!string.IsNullOrWhiteSpace(element))
-                    {
-                        if(element.Contains("="))
-                        {
-                            var kvp = element.Split("=".ToCharArray());
-                            dict.Add(kvp[0], kvp[1]);
-                        }
-                    }
-                }
+                var dict = Utility.ParseConnectionString(connectionstring);
 
                 if (dict.ContainsKey("FILE"))
                 {
@@ -79,6 +67,14 @@ namespace AlexanderDevelopment.ConfigDataMover
                     if (dict.ContainsKey("PASSWORD"))
                         passwordTextbox.Text = dict["PASSWORD"];
                 }
+            }
+            else
+            {
+                //starting with a blank connection, assume it's to crm
+                useFileRadiobutton.Checked = false;
+                useCrmRadiobutton.Checked = true;
+
+                clearFileParams();
             }
 
             if(_isSource)

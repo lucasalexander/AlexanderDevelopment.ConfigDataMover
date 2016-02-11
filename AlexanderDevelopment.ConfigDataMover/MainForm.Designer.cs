@@ -56,8 +56,6 @@
             this.saveConnectionsCheckBox = new System.Windows.Forms.CheckBox();
             this.targetLabel = new System.Windows.Forms.Label();
             this.sourceLabel = new System.Windows.Forms.Label();
-            this.targetTextBox = new System.Windows.Forms.TextBox();
-            this.sourceTextBox = new System.Windows.Forms.TextBox();
             this.formStatusStrip = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -217,7 +215,7 @@
             // mapBuCheckBox
             // 
             this.mapBuCheckBox.AutoSize = true;
-            this.mapBuCheckBox.Location = new System.Drawing.Point(9, 94);
+            this.mapBuCheckBox.Location = new System.Drawing.Point(9, 98);
             this.mapBuCheckBox.Name = "mapBuCheckBox";
             this.mapBuCheckBox.Size = new System.Drawing.Size(168, 17);
             this.mapBuCheckBox.TabIndex = 25;
@@ -227,7 +225,7 @@
             // mapCurrencyCheckBox
             // 
             this.mapCurrencyCheckBox.AutoSize = true;
-            this.mapCurrencyCheckBox.Location = new System.Drawing.Point(9, 117);
+            this.mapCurrencyCheckBox.Location = new System.Drawing.Point(9, 121);
             this.mapCurrencyCheckBox.Name = "mapCurrencyCheckBox";
             this.mapCurrencyCheckBox.Size = new System.Drawing.Size(153, 17);
             this.mapCurrencyCheckBox.TabIndex = 30;
@@ -300,9 +298,7 @@
             this.groupBox2.Controls.Add(this.mapBuCheckBox);
             this.groupBox2.Controls.Add(this.targetLabel);
             this.groupBox2.Controls.Add(this.sourceLabel);
-            this.groupBox2.Controls.Add(this.targetTextBox);
             this.groupBox2.Controls.Add(this.mapCurrencyCheckBox);
-            this.groupBox2.Controls.Add(this.sourceTextBox);
             this.groupBox2.Location = new System.Drawing.Point(12, 28);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(567, 161);
@@ -312,28 +308,28 @@
             // 
             // editTargetButton
             // 
-            this.editTargetButton.Location = new System.Drawing.Point(472, 48);
+            this.editTargetButton.Location = new System.Drawing.Point(9, 46);
             this.editTargetButton.Name = "editTargetButton";
-            this.editTargetButton.Size = new System.Drawing.Size(75, 23);
+            this.editTargetButton.Size = new System.Drawing.Size(105, 23);
             this.editTargetButton.TabIndex = 19;
-            this.editTargetButton.Text = "Edit";
+            this.editTargetButton.Text = "Select target";
             this.editTargetButton.UseVisualStyleBackColor = true;
             this.editTargetButton.Click += new System.EventHandler(this.editTargetButton_Click);
             // 
             // editSourceButton
             // 
-            this.editSourceButton.Location = new System.Drawing.Point(472, 17);
+            this.editSourceButton.Location = new System.Drawing.Point(9, 15);
             this.editSourceButton.Name = "editSourceButton";
-            this.editSourceButton.Size = new System.Drawing.Size(75, 23);
+            this.editSourceButton.Size = new System.Drawing.Size(105, 23);
             this.editSourceButton.TabIndex = 16;
-            this.editSourceButton.Text = "Edit";
+            this.editSourceButton.Text = "Select source";
             this.editSourceButton.UseVisualStyleBackColor = true;
             this.editSourceButton.Click += new System.EventHandler(this.editSourceButton_Click);
             // 
             // saveConnectionsCheckBox
             // 
             this.saveConnectionsCheckBox.AutoSize = true;
-            this.saveConnectionsCheckBox.Location = new System.Drawing.Point(9, 71);
+            this.saveConnectionsCheckBox.Location = new System.Drawing.Point(9, 75);
             this.saveConnectionsCheckBox.Name = "saveConnectionsCheckBox";
             this.saveConnectionsCheckBox.Size = new System.Drawing.Size(146, 17);
             this.saveConnectionsCheckBox.TabIndex = 20;
@@ -343,34 +339,20 @@
             // targetLabel
             // 
             this.targetLabel.AutoSize = true;
-            this.targetLabel.Location = new System.Drawing.Point(6, 48);
+            this.targetLabel.Location = new System.Drawing.Point(124, 46);
             this.targetLabel.Name = "targetLabel";
-            this.targetLabel.Size = new System.Drawing.Size(38, 13);
+            this.targetLabel.Size = new System.Drawing.Size(96, 13);
             this.targetLabel.TabIndex = 154;
-            this.targetLabel.Text = "Target";
+            this.targetLabel.Text = "No target specified";
             // 
             // sourceLabel
             // 
             this.sourceLabel.AutoSize = true;
-            this.sourceLabel.Location = new System.Drawing.Point(6, 22);
+            this.sourceLabel.Location = new System.Drawing.Point(124, 20);
             this.sourceLabel.Name = "sourceLabel";
-            this.sourceLabel.Size = new System.Drawing.Size(41, 13);
+            this.sourceLabel.Size = new System.Drawing.Size(101, 13);
             this.sourceLabel.TabIndex = 153;
-            this.sourceLabel.Text = "Source";
-            // 
-            // targetTextBox
-            // 
-            this.targetTextBox.Location = new System.Drawing.Point(71, 48);
-            this.targetTextBox.Name = "targetTextBox";
-            this.targetTextBox.Size = new System.Drawing.Size(395, 20);
-            this.targetTextBox.TabIndex = 18;
-            // 
-            // sourceTextBox
-            // 
-            this.sourceTextBox.Location = new System.Drawing.Point(71, 19);
-            this.sourceTextBox.Name = "sourceTextBox";
-            this.sourceTextBox.Size = new System.Drawing.Size(395, 20);
-            this.sourceTextBox.TabIndex = 15;
+            this.sourceLabel.Text = "No source specified";
             // 
             // formStatusStrip
             // 
@@ -418,14 +400,14 @@
             // loadJobToolStripMenuItem
             // 
             this.loadJobToolStripMenuItem.Name = "loadJobToolStripMenuItem";
-            this.loadJobToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.loadJobToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
             this.loadJobToolStripMenuItem.Text = "Load job";
             this.loadJobToolStripMenuItem.Click += new System.EventHandler(this.loadJobButton_Click);
             // 
             // saveJobToolStripMenuItem
             // 
             this.saveJobToolStripMenuItem.Name = "saveJobToolStripMenuItem";
-            this.saveJobToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveJobToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
             this.saveJobToolStripMenuItem.Text = "Save job";
             this.saveJobToolStripMenuItem.Click += new System.EventHandler(this.saveJobButton_Click);
             // 
@@ -530,8 +512,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn sourceGuid;
         private System.Windows.Forms.DataGridViewTextBoxColumn targetGuid;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.TextBox sourceTextBox;
-        private System.Windows.Forms.TextBox targetTextBox;
         private System.Windows.Forms.Label sourceLabel;
         private System.Windows.Forms.Label targetLabel;
         private System.Windows.Forms.CheckBox updateOnlyCheckBox;

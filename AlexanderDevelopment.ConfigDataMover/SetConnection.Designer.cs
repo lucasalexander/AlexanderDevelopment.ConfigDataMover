@@ -101,6 +101,7 @@
             this.passwordTextbox.Name = "passwordTextbox";
             this.passwordTextbox.Size = new System.Drawing.Size(302, 20);
             this.passwordTextbox.TabIndex = 45;
+            this.passwordTextbox.UseSystemPasswordChar = true;
             // 
             // domainLabel
             // 

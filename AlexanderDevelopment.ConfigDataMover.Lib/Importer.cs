@@ -595,7 +595,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                 LogMessage("ERROR", string.Format("    record transfer failed"));
 
                                 //to record error log
-                                LogMessage("ERROR", string.Format("RECORD ERROR: {0}, {1}", entity.Id, entity.LogicalName));
+                                LogMessage("ERROR", string.Format("RECORD ERROR: {0}, {1}, MESSAGE:{2}", entity.Id, entity.LogicalName, ex.Detail?.Message));
 
                                 //increment the error count
                                 _errorCount++;

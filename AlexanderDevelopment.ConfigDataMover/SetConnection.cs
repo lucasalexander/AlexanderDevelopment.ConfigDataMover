@@ -77,7 +77,7 @@ namespace AlexanderDevelopment.ConfigDataMover
                 clearFileParams();
             }
 
-            if(_isSource)
+            if (_isSource)
             {
                 this.Text = "Set source";
             }
@@ -95,7 +95,7 @@ namespace AlexanderDevelopment.ConfigDataMover
         private void setConnectionButton_Click(object sender, EventArgs e)
         {
             string connectionString = string.Empty;
-            if(useFileRadiobutton.Checked)
+            if (useFileRadiobutton.Checked)
             {
                 connectionString = string.Format("file={0}", pathTextbox.Text);
             }
@@ -132,7 +132,7 @@ namespace AlexanderDevelopment.ConfigDataMover
 
         private void useCrmRadiobutton_CheckedChanged(object sender, EventArgs e)
         {
-            if(useCrmRadiobutton.Checked)
+            if (useCrmRadiobutton.Checked)
             {
                 clearFileParams();
                 enableCrmConnectionParams();
@@ -227,7 +227,7 @@ namespace AlexanderDevelopment.ConfigDataMover
                           </entity>
                         </fetch>";
                         EntityCollection buEntities = service.RetrieveMultiple(new FetchExpression(testFetch));
-                        if(buEntities.Entities.Count<1)
+                        if (buEntities.Entities.Count < 1)
                         {
                             throw new Exception("Could not retrieve results from test query.");
                         }

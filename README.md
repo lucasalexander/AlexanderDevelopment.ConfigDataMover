@@ -3,8 +3,8 @@ This is a tool used for making sure that configuration data like teams and queue
 
 Here's an explanation of the various settings and parameters that can be specified in the GUI:
 
-1. Source - Simplified CRM connection string for source organization OR full path to source data file in the form of "FILE=C:\datadirectory\datafile.json."
-1. Target - Simplified CRM connection string for target organization OR full path to target data file in the form of "FILE=C:\datadirectory\datafile.json."
+1. Source - CRM connection parameters for source organization OR full path to source data file in the form of "C:\datadirectory\datafile.json."
+1. Target - CRM connection parameters for target organization OR full path to target data file in the form of "C:\datadirectory\datafile.json."
 1. Save connection details? - If checked, connection details should be saved in configuration file. Note, connection details are unencrypted.
 1. Map root business unit GUID? - If checked, the job will automatically change any GUID references from the source organization root business unit to the target organization root business unit.
 1. Map base currency GUID? - If checked, the job will automatically change any GUID references from the source organization base currency to the target organization base currency.

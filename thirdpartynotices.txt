@@ -1,0 +1,21 @@
+This software incorporate material from the libraries and projects listed below (collectively, “Third Party Code”).  Please Note:  Lucas Alexander is not the original author of the Third Party Code.  The URL for the original file source or binary download, the original copyright notice and the license under which Lucas Alexander received Third Party Code are set forth below. Such notices and license are provided solely for your information.   
+
+commandline
+	Original source:	https://github.com/gsscoder/commandline 
+	Original copyright:	Copyright 2005 - 2015 Giacomo Stelluti Scala & Contributors
+	Original license:	MIT License - https://raw.githubusercontent.com/gsscoder/commandline/master/License.md
+ 
+Json.NET
+	Original source:	http://www.newtonsoft.com/json 
+	Original copyright:	Copyright 2007 James Newton-King
+	Original license:	MIT License - https://raw.githubusercontent.com/JamesNK/Newtonsoft.Json/master/LICENSE.md
+ 
+Apache log4net
+	Original source:	https://logging.apache.org/log4net/  
+	Original copyright:	Copyright 2004-2015 The Apache Software Foundation
+	Original license:	Apache License - http://logging.apache.org/log4net/license.html
+ 
+Microsoft Dynamics CRM SDK
+	Original download:	https://msdn.microsoft.com/en-us/library/hh547453(v=crm.7).aspx
+	Original copyright:	Microsoft
+	Original license:	Microsoft Dynamics CRM EULA (see included mscrmeula.txt file)

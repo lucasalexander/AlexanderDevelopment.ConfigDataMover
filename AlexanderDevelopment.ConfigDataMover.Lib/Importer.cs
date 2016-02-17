@@ -485,56 +485,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                     LogMessage("INFO", "  preparing data from source file for update/import");
 
                     //get the recordset in the file that corresponds to the current job step and loop through it
-                    foreach (var e in _savedSourceData.RecordSets[i])
-                    {
-                        //instantiate a new crm entity object
-                        Entity entity = new Entity(e.LogicalName);
-                        entity.Id = e.Id;
-                        entity.LogicalName = e.LogicalName;
+                    ec = TransformExportEntityList(_savedSourceData.RecordSets[i]);
 
-                        //loop through the attributes stored in the file
-                        foreach (ExportAttribute exportAttribute in e.Attributes)
-                        {
-                            //JObject object if we need to parse a complex type
-                            Newtonsoft.Json.Linq.JObject jObject;
-
-                            //instantiate a new object to hold the attribute value
-                            object attributeValue = null;
-
-                            //give the attribute the correct name
-                            string attributeName = exportAttribute.AttributeName;
-
-                            //check the stored attribute type in the file and set the crm entity's attribute values accordingly
-                            switch (exportAttribute.AttributeType)
-                            {
-                                //if it's an entityreference
-                                case "Microsoft.Xrm.Sdk.EntityReference":
-                                    jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
-                                    EntityReference lookup = new EntityReference((string)jObject["LogicalName"], (Guid)jObject["Id"]);
-                                    attributeValue = lookup;
-                                    break;
-                                //if it's an optionsetvalue
-                                case "Microsoft.Xrm.Sdk.OptionSetValue":
-                                    jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
-                                    attributeValue = new OptionSetValue { Value = (int)jObject["Value"] };
-                                    break;
-                                //if it's money
-                                case "Microsoft.Xrm.Sdk.Money":
-                                    jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
-                                    attributeValue = new Microsoft.Xrm.Sdk.Money { Value = (decimal)jObject["Value"] };
-                                    break;
-                                //if it's anything else - i think this covers everything we would typically need
-                                default:
-                                    attributeValue = exportAttribute.AttributeValue;
-                                    break;
-                            }
-                            //add the attribute name and value to the entity's attributes collection
-                            entity.Attributes.Add(attributeName, attributeValue);
-                        }
-
-                        //add the entity to the entity collection
-                        ec.Add(entity);
-                    }
                 }
                 else //source is live crm org
                 {
@@ -669,31 +621,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
 
                     //instantiate a new list of exportentity objects
                     List<ExportEntity> entitiesToExport = new List<ExportEntity>();
-
-                    //loop through each entity in the collection
-                    foreach(Entity e in ec)
-                    {
-                        //instantiate a new exportentity object and set its fields appropriately
-                        ExportEntity exportEntity = new ExportEntity();
-                        exportEntity.Id = e.Id;
-                        exportEntity.LogicalName = e.LogicalName;
-                        foreach(var attribute in e.Attributes)
-                        {
-                            //leave out the entity id and logical name from the attribute collection - they cause problems on import
-                            if ((attribute.Key.ToUpper() != e.LogicalName.ToUpper() + "ID") 
-                                && (attribute.Key.ToUpper() != "LOGICALNAME"))
-                            {
-                                ExportAttribute exportAttribute = new ExportAttribute();
-                                exportAttribute.AttributeName = attribute.Key;
-                                exportAttribute.AttributeValue = attribute.Value;
-                                exportAttribute.AttributeType = attribute.Value.GetType().ToString();
-                                exportEntity.Attributes.Add(exportAttribute);
-                            }
-                        }
-
-                        //add the exportentity object to the recordset
-                        entitiesToExport.Add(exportEntity);
-                    }
+                    entitiesToExport = TransformEntityList(ec);
 
                     //add the recordset to the exporteddata object to be serialized
                     _savedSourceData.RecordSets.Add(entitiesToExport);
@@ -721,7 +649,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         serializer.TypeNameHandling = TypeNameHandling.None;
                         
                         //you can change this if you want a more easily readable output file, but this makes for a smaller file size
-                        serializer.Formatting = Newtonsoft.Json.Formatting.None; 
+                        serializer.Formatting = Newtonsoft.Json.Formatting.Indented; 
 
                         //serialize and save
                         serializer.Serialize(writer, _savedSourceData);
@@ -733,6 +661,148 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
 
             //stop logging
             logger.Logger.Repository.Shutdown();
+        }
+
+        /// <summary>
+        /// transforms a list of exportentity records into a list of crm entity records
+        /// </summary>
+        /// <param name="entitylist"></param>
+        /// <returns></returns>
+        private List<Entity> TransformExportEntityList(List<ExportEntity> entitylist)
+        {
+            List<Entity> ec = new List<Entity>();
+            foreach (var e in entitylist)
+            {
+                //instantiate a new crm entity object
+                Entity entity = new Entity(e.LogicalName);
+                entity.Id = e.Id;
+                entity.LogicalName = e.LogicalName;
+
+                //loop through the attributes stored in the file
+                foreach (ExportAttribute exportAttribute in e.Attributes)
+                {
+                    //JObject object if we need to parse a complex type
+                    Newtonsoft.Json.Linq.JObject jObject;
+
+                    //JArray object if we need to parse an entitycollection
+                    Newtonsoft.Json.Linq.JArray jArray;
+
+                    //instantiate a new object to hold the attribute value
+                    object attributeValue = null;
+
+                    //give the attribute the correct name
+                    string attributeName = exportAttribute.AttributeName;
+
+                    //check the stored attribute type in the file and set the crm entity's attribute values accordingly
+                    switch (exportAttribute.AttributeType)
+                    {
+                        //if it's a system.guid
+                        case "System.Guid":
+                            attributeValue = new Guid((string)exportAttribute.AttributeValue);
+                            break;
+                        //if it's an entityreference
+                        case "Microsoft.Xrm.Sdk.EntityReference":
+                            jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
+                            EntityReference lookup = new EntityReference((string)jObject["LogicalName"], (Guid)jObject["Id"]);
+                            attributeValue = lookup;
+                            break;
+                        //if it's an optionsetvalue
+                        case "Microsoft.Xrm.Sdk.OptionSetValue":
+                            jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
+                            attributeValue = new OptionSetValue { Value = (int)jObject["Value"] };
+                            break;
+                        //if it's money
+                        case "Microsoft.Xrm.Sdk.Money":
+                            jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
+                            attributeValue = new Microsoft.Xrm.Sdk.Money { Value = (decimal)jObject["Value"] };
+                            break;
+                        //if it's a collection of child entities
+                        case "Microsoft.Xrm.Sdk.EntityCollection":
+                            //json.net will see it as a jarray
+                            jArray = (Newtonsoft.Json.Linq.JArray)exportAttribute.AttributeValue;
+
+                            //create and populate a list of exportentity objects so we can recurse
+                            List<ExportEntity> childentities = new List<ExportEntity>();
+                            foreach(var child in jArray.Children())
+                            {
+                                ExportEntity childentity = (ExportEntity)JsonConvert.DeserializeObject<ExportEntity>(child.ToString());
+                                childentities.Add(childentity);
+                            }
+
+                            //create an empty entitycollection
+                            EntityCollection collection = new EntityCollection();
+
+                            //recurse and parse the returned list of entities to add each item in the list to the entitycollection object
+                            foreach(var item in TransformExportEntityList(childentities))
+                            {
+                                collection.Entities.Add(item);
+                            }
+
+                            //set the attribute value to the entitycollection
+                            attributeValue = collection;
+                            break;
+                        //if it's anything else - i think this covers everything we would typically need
+                        default:
+                            attributeValue = exportAttribute.AttributeValue;
+                            break;
+                    }
+                    //add the attribute name and value to the entity's attributes collection
+                    entity.Attributes.Add(attributeName, attributeValue);
+                }
+
+                //add the entity to the entity collection
+                ec.Add(entity);
+            }
+            return ec;
+        }
+
+        /// <summary>
+        /// transforms a list of crm entity records into a list of exportentity records
+        /// </summary>
+        /// <param name="entitylist"></param>
+        /// <returns></returns>
+        private List<ExportEntity> TransformEntityList(List<Entity> entitylist)
+        {
+            List<ExportEntity> entitiesToExport = new List<ExportEntity>();
+            foreach (Entity e in entitylist)
+            {
+                //instantiate a new exportentity object and set its fields appropriately
+                ExportEntity exportEntity = new ExportEntity();
+                exportEntity.Id = e.Id;
+                exportEntity.LogicalName = e.LogicalName;
+                foreach (var attribute in e.Attributes)
+                {
+                    //leave out the entity id and logical name from the attribute collection - they cause problems on import
+                    if ((attribute.Key.ToUpper() != e.LogicalName.ToUpper() + "ID")
+                        && (attribute.Key.ToUpper() != "LOGICALNAME"))
+                    {
+                        ExportAttribute exportAttribute = new ExportAttribute();
+                        exportAttribute.AttributeName = attribute.Key;
+                        exportAttribute.AttributeType = attribute.Value.GetType().ToString();
+                        if (exportAttribute.AttributeType == "Microsoft.Xrm.Sdk.EntityCollection")
+                        {
+                            //do recursion
+                            EntityCollection ec = (EntityCollection)attribute.Value;
+                            List<Entity> entities = new List<Entity>();
+                            foreach(var entity in ec.Entities)
+                            {
+                                entities.Add(entity);
+                            }
+                            exportAttribute.AttributeValue = TransformEntityList(entities);
+                        }
+                        else
+                        {
+                            exportAttribute.AttributeValue = attribute.Value;
+                        }
+                        exportEntity.Attributes.Add(exportAttribute);
+                    }
+                }
+
+                //add the exportentity object to the recordset
+                entitiesToExport.Add(exportEntity);
+            }
+
+            return entitiesToExport;
         }
     }
 

@@ -649,7 +649,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         serializer.TypeNameHandling = TypeNameHandling.None;
                         
                         //you can change this if you want a more easily readable output file, but this makes for a smaller file size
-                        serializer.Formatting = Newtonsoft.Json.Formatting.Indented; 
+                        serializer.Formatting = Newtonsoft.Json.Formatting.None; 
 
                         //serialize and save
                         serializer.Serialize(writer, _savedSourceData);

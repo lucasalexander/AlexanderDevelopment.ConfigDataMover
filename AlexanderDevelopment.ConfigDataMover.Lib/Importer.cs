@@ -709,84 +709,77 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
 
                     //give the attribute the correct name
                     string attributeName = exportAttribute.AttributeName;
-
-                    //check the stored attribute type in the file and set the crm entity's attribute values accordingly
-                    switch (exportAttribute.AttributeType)
+                    try
                     {
-                        //if it's a system.guid
-                        case "System.Guid":
-                            attributeValue = new Guid((string)exportAttribute.AttributeValue);
-                            break;
-                        //if it's a system.decimal
-                        case "System.Decimal":
-                            decimal decimalValue = 0;
-                            if (Decimal.TryParse((string)exportAttribute.AttributeValue, out decimalValue))
-                            {
-                                attributeValue = decimalValue;
-                            }
-                            else
-                            {
-                                attributeValue = null;
-                            }
-                            break;
-                        //if it's a system.double
-                        case "System.Double":
-                            double doubleValue = 0;
-                            if (Double.TryParse((string)exportAttribute.AttributeValue, out doubleValue))
-                            {
-                                attributeValue = doubleValue;
-                            }
-                            else
-                            {
-                                attributeValue = null;
-                            }
-                            break;
-                        //if it's an entityreference
-                        case "Microsoft.Xrm.Sdk.EntityReference":
-                            jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
-                            EntityReference lookup = new EntityReference((string)jObject["LogicalName"], (Guid)jObject["Id"]);
-                            attributeValue = lookup;
-                            break;
-                        //if it's an optionsetvalue
-                        case "Microsoft.Xrm.Sdk.OptionSetValue":
-                            jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
-                            attributeValue = new OptionSetValue { Value = (int)jObject["Value"] };
-                            break;
-                        //if it's money
-                        case "Microsoft.Xrm.Sdk.Money":
-                            jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
-                            attributeValue = new Microsoft.Xrm.Sdk.Money { Value = (decimal)jObject["Value"] };
-                            break;
-                        //if it's a collection of child entities
-                        case "Microsoft.Xrm.Sdk.EntityCollection":
-                            //json.net will see it as a jarray
-                            jArray = (Newtonsoft.Json.Linq.JArray)exportAttribute.AttributeValue;
+                        //check the stored attribute type in the file and set the crm entity's attribute values accordingly
+                        switch (exportAttribute.AttributeType)
+                        {
+                            //if it's a system.guid
+                            case "System.Guid":
+                                attributeValue = new Guid((string)exportAttribute.AttributeValue);
+                                break;
+                            //if it's a system.decimal
+                            case "System.Decimal":
+                                string typename = exportAttribute.AttributeValue.GetType().ToString();
+                                attributeValue = Convert.ToDecimal(exportAttribute.AttributeValue);
+                                break;
+                            //if it's a system.double
+                            case "System.Double":
+                                attributeValue = Convert.ToDouble(exportAttribute.AttributeValue);
+                                break;
+                            //if it's an entityreference
+                            case "Microsoft.Xrm.Sdk.EntityReference":
+                                jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
+                                EntityReference lookup = new EntityReference((string)jObject["LogicalName"], (Guid)jObject["Id"]);
+                                attributeValue = lookup;
+                                break;
+                            //if it's an optionsetvalue
+                            case "Microsoft.Xrm.Sdk.OptionSetValue":
+                                jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
+                                attributeValue = new OptionSetValue { Value = (int)jObject["Value"] };
+                                break;
+                            //if it's money
+                            case "Microsoft.Xrm.Sdk.Money":
+                                jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
+                                attributeValue = new Microsoft.Xrm.Sdk.Money { Value = (decimal)jObject["Value"] };
+                                break;
+                            //if it's a collection of child entities
+                            case "Microsoft.Xrm.Sdk.EntityCollection":
+                                //json.net will see it as a jarray
+                                jArray = (Newtonsoft.Json.Linq.JArray)exportAttribute.AttributeValue;
 
-                            //create and populate a list of exportentity objects so we can recurse
-                            List<ExportEntity> childentities = new List<ExportEntity>();
-                            foreach(var child in jArray.Children())
-                            {
-                                ExportEntity childentity = (ExportEntity)JsonConvert.DeserializeObject<ExportEntity>(child.ToString());
-                                childentities.Add(childentity);
-                            }
+                                //create and populate a list of exportentity objects so we can recurse
+                                List<ExportEntity> childentities = new List<ExportEntity>();
+                                foreach (var child in jArray.Children())
+                                {
+                                    ExportEntity childentity = (ExportEntity)JsonConvert.DeserializeObject<ExportEntity>(child.ToString());
+                                    childentities.Add(childentity);
+                                }
 
-                            //create an empty entitycollection
-                            EntityCollection collection = new EntityCollection();
+                                //create an empty entitycollection
+                                EntityCollection collection = new EntityCollection();
 
-                            //recurse and parse the returned list of entities to add each item in the list to the entitycollection object
-                            foreach(var item in TransformExportEntityList(childentities))
-                            {
-                                collection.Entities.Add(item);
-                            }
+                                //recurse and parse the returned list of entities to add each item in the list to the entitycollection object
+                                foreach (var item in TransformExportEntityList(childentities))
+                                {
+                                    collection.Entities.Add(item);
+                                }
 
-                            //set the attribute value to the entitycollection
-                            attributeValue = collection;
-                            break;
-                        //if it's anything else - i think this covers everything we would typically need
-                        default:
-                            attributeValue = exportAttribute.AttributeValue;
-                            break;
+                                //set the attribute value to the entitycollection
+                                attributeValue = collection;
+                                break;
+                            //if it's anything else - i think this covers everything we would typically need
+                            default:
+                                attributeValue = exportAttribute.AttributeValue;
+                                break;
+                        }
                     }
+                    catch (Exception ex) //if we get an error deserializing, set the attribute value to null and move along - this may not be the behavior you want!
+                    {
+                        attributeValue = null;
+                        LogMessage("INFO", string.Format("    error deserializing {3} attribute {0} for entity type {1}, id {2}", attributeName, e.LogicalName, e.Id.ToString(), exportAttribute.AttributeType));
+                    }
+
                     //add the attribute name and value to the entity's attributes collection
                     entity.Attributes.Add(attributeName, attributeValue);
                 }

@@ -57,6 +57,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
 
         List<GuidMapping> _mappings = new List<GuidMapping>();
 
+        private enum operationTypes { Create, Update };
+        
         /// <summary>
         /// log4net logger
         /// </summary>
@@ -534,6 +536,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                     //if the target is a live crm org
                     if (!_isFileTarget)
                     {
+                        operationTypes importoperation = new operationTypes();
+
                         //loop through each entity in the collection
                         foreach (Entity entity in ec)
                         {
@@ -579,18 +583,30 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                 //try to update first
                                 try
                                 {
+                                    importoperation = operationTypes.Update;
                                     LogMessage("INFO", "    trying target update");
                                     targetService.Update(entity);
                                     LogMessage("INFO", "    update ok");
                                 }
                                 catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
                                 {
+                                    //only try a create if it's not an updateonly step
                                     if (!step.UpdateOnly)
                                     {
-                                        LogMessage("INFO", "    trying target create");
-                                        //if update fails and step is not update-only then try to create
-                                        targetService.Create(entity);
-                                        LogMessage("INFO", "    create ok");
+                                        //only try the create step if the update failed because the record doesn't already exist to update
+                                        if (ex.Message.ToUpper().EndsWith("DOES NOT EXIST"))
+                                        {
+                                            importoperation = operationTypes.Create;
+                                            LogMessage("INFO", "    trying target create");
+                                            //if update fails and step is not update-only then try to create
+                                            targetService.Create(entity);
+                                            LogMessage("INFO", "    create ok");
+                                        }
+                                        else //if the update failed for any reason other than "does not exist" we have a problem and don't want to try the create step
+                                        {
+                                            LogMessage("INFO", string.Format("    update failed: {0}", ex.Message));
+                                            throw new FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault>(ex.Detail);
+                                        }
                                     }
                                     else
                                     {
@@ -600,12 +616,13 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                             }
                             catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
                             {
+                                string operation = (importoperation == operationTypes.Create) ? "CREATE" : "UPDATE";
                                 //if everything fails, log error
                                 //to main log
                                 LogMessage("ERROR", string.Format("    record transfer failed"));
 
                                 //to record error log
-                                LogMessage("ERROR", string.Format("RECORD ERROR: {0}, {1}, MESSAGE:{2}", entity.Id, entity.LogicalName, ex.Detail?.Message));
+                                LogMessage("ERROR", string.Format("RECORD ERROR: {0}, {1}, OPERATION: {2}, MESSAGE: {3}", entity.Id, entity.LogicalName, operation, ex.Detail?.Message));
 
                                 //increment the error count
                                 _errorCount++;
@@ -699,6 +716,30 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         //if it's a system.guid
                         case "System.Guid":
                             attributeValue = new Guid((string)exportAttribute.AttributeValue);
+                            break;
+                        //if it's a system.decimal
+                        case "System.Decimal":
+                            decimal decimalValue = 0;
+                            if (Decimal.TryParse((string)exportAttribute.AttributeValue, out decimalValue))
+                            {
+                                attributeValue = decimalValue;
+                            }
+                            else
+                            {
+                                attributeValue = null;
+                            }
+                            break;
+                        //if it's a system.double
+                        case "System.Double":
+                            double doubleValue = 0;
+                            if (Double.TryParse((string)exportAttribute.AttributeValue, out doubleValue))
+                            {
+                                attributeValue = doubleValue;
+                            }
+                            else
+                            {
+                                attributeValue = null;
+                            }
                             break;
                         //if it's an entityreference
                         case "Microsoft.Xrm.Sdk.EntityReference":

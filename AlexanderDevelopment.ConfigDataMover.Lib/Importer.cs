@@ -885,6 +885,10 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                             case "System.Double":
                                 attributeValue = Convert.ToDouble(exportAttribute.AttributeValue);
                                 break;
+                            //if it's an int32
+                            case "System.Int32":
+                                attributeValue = Convert.ToInt32(exportAttribute.AttributeValue);
+                                break;
                             //if it's an entityreference
                             case "Microsoft.Xrm.Sdk.EntityReference":
                                 jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;

@@ -44,6 +44,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
         public bool MapBaseCurrency { get; set; }
         public List<GuidMapping> GuidMappings { get; set; }
         public List<JobStep> JobSteps { get; set; }
+        public bool StopLogging { get; set; } 
 
         public int ErrorCount { get { return _errorCount; } }
         private int _errorCount;
@@ -79,6 +80,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             _mappings = new List<GuidMapping>();
             _errorCount = 0;
             log4net.Config.XmlConfigurator.Configure();
+            StopLogging = true;
         }
 
         /// <summary>
@@ -834,8 +836,11 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             }
             LogMessage("INFO", "job complete");
 
-            //stop logging
-            logger.Logger.Repository.Shutdown();
+            if (StopLogging)
+            {
+                //stop logging
+                logger.Logger.Repository.Shutdown();
+            }
         }
 
         /// <summary>

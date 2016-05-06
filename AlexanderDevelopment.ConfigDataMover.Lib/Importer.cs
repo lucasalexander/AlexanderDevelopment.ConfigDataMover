@@ -935,6 +935,10 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                 //set the attribute value to the entitycollection
                                 attributeValue = collection;
                                 break;
+                            //for entity images
+                            case "System.Byte[]":
+                                attributeValue = Convert.FromBase64String(exportAttribute.AttributeValue.ToString());
+                                break;
                             //if it's anything else - i think this covers everything we would typically need
                             default:
                                 attributeValue = exportAttribute.AttributeValue;

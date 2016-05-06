@@ -45,7 +45,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Cli
         {
             var help = new HelpText
             {
-                Heading = new HeadingInfo("AlexanderDevelopment.ConfigDataMover.Cli", "1.0.0.0"),
+                Heading = new HeadingInfo("AlexanderDevelopment.ConfigDataMover.Cli", "1.10.0.1"),
                 AdditionalNewLineAfterOption = true,
                 AddDashesToOption = true
             };

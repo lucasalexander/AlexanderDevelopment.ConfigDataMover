@@ -212,25 +212,38 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         //get the organization id
                         Guid orgId = ((WhoAmIResponse)service.Execute(new WhoAmIRequest())).OrganizationId;
 
-                        //query discovery service to determine version of target organization
-                        var discoveryService = new DiscoveryService(_targetConn);
-                        RetrieveOrganizationsRequest orgsRequest =
-                        new RetrieveOrganizationsRequest()
+                        //if host is xxx.dynamics.com, then target is crm online
+                        if (_targetConn.ServiceUri.Host.EndsWith("dynamics.com"))
                         {
-                            AccessType = EndpointAccessType.Default,
-                            Release = OrganizationRelease.Current
-                        };
-                        RetrieveOrganizationsResponse organizations =
-                            (RetrieveOrganizationsResponse)discoveryService.Execute(orgsRequest);
-                        foreach (OrganizationDetail organization in organizations.Details)
-                        {
-                            if(organization.OrganizationId == orgId)
-                            {
-                                //set target version variable for use later
-                                _targetVersion = organization.OrganizationVersion;
+                            //assume target version is 7.1.0.0 - crm 2015 update 1 as a minimum
+                            _targetVersion = "7.1.0.0";
 
-                                //log target version
-                                LogMessage("INFO", "target version is - " + organization.OrganizationVersion);
+                            //log target version
+                            LogMessage("INFO", "target is - CRM online");
+                            LogMessage("INFO", "assuming target version is - " + _targetVersion);
+                        }
+                        else {
+
+                            //query discovery service to determine version of target organization
+                            var discoveryService = new DiscoveryService(_targetConn);
+                            RetrieveOrganizationsRequest orgsRequest =
+                            new RetrieveOrganizationsRequest()
+                            {
+                                AccessType = EndpointAccessType.Default,
+                                Release = OrganizationRelease.Current
+                            };
+                            RetrieveOrganizationsResponse organizations =
+                                (RetrieveOrganizationsResponse)discoveryService.Execute(orgsRequest);
+                            foreach (OrganizationDetail organization in organizations.Details)
+                            {
+                                if (organization.OrganizationId == orgId)
+                                {
+                                    //set target version variable for use later
+                                    _targetVersion = organization.OrganizationVersion;
+
+                                    //log target version
+                                    LogMessage("INFO", "target version is - " + _targetVersion);
+                                }
                             }
                         }
                     }

@@ -205,6 +205,79 @@ namespace AlexanderDevelopment.ConfigDataMover
             }
         }
 
+        void ValidateSteps()
+        {
+            //load CRM fetchxml schema to use for validation later- https://msdn.microsoft.com/en-us/library/gg309405.aspx
+            XmlSchemaSet schemaSet = new XmlSchemaSet();
+            try
+            {
+                schemaSet.Add(null, "fetch.xsd");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Could not load FetchXML XSD to use for validation.");
+            }
+
+            //loop through each job step
+            for (int i = 0; i < stepListBox.Items.Count; i++)
+            {
+                string errormsg = "";
+                if (string.IsNullOrWhiteSpace(((JobStep)stepListBox.Items[i]).StepName))
+                {
+                    errormsg = string.Format("Step #{0} has no name", i + 1);
+                    throw new Exception(errormsg);
+                }
+
+                if (string.IsNullOrWhiteSpace(((JobStep)stepListBox.Items[i]).StepFetch))
+                {
+                    errormsg = string.Format("Step \"{0}\" has no query statement", ((JobStep)stepListBox.Items[i]).StepName);
+                    throw new Exception(errormsg);
+                }
+                
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.Schemas.Add(schemaSet);
+                settings.ValidationEventHandler += (sender, args) =>
+                {
+                    if (args.Severity == XmlSeverityType.Warning)
+                    {
+                        errormsg = string.Format("Step \"{0}\" matching schema not found.  No validation occurred. {1}", ((JobStep)stepListBox.Items[i]).StepName, args.Message);
+                    }
+                    else
+                    {
+                        errormsg = string.Format("Step \"{0}\" query schema validation error: {1}", ((JobStep)stepListBox.Items[i]).StepName, args.Message);
+                    }
+                    throw new Exception(errormsg);
+                };
+                settings.ValidationType = ValidationType.Schema;
+                try
+                {
+                    //create an xmlreader from the step fetch with the validation settings from above
+                    StringReader stringReader = new StringReader(((JobStep)stepListBox.Items[i]).StepFetch);
+                    XmlReader xreader = XmlReader.Create(stringReader, settings);
+
+                    //read just to trigger the validation
+                    while (xreader.Read()) { }
+
+                    //close the reader
+                    xreader.Close();
+                }
+                catch (XmlException ex)
+                {
+                    errormsg = string.Format("Step \"{0}\" query could not be loaded or read", ((JobStep)stepListBox.Items[i]).StepName);
+                    throw new Exception(errormsg);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    errormsg = string.Format("Step \"{0}\" query could not be loaded or read", ((JobStep)stepListBox.Items[i]).StepName);
+                    throw new Exception(errormsg);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+            }
+        }
+
         /// <summary>
         /// saves the job from a file
         /// </summary>
@@ -220,6 +293,16 @@ namespace AlexanderDevelopment.ConfigDataMover
             // If the file name is not an empty string open it for saving.
             if (saveFileDialog1.FileName != "")
             {
+                try
+                {
+                    ValidateSteps();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(string.Format("The job steps could not be validated. Save aborted.\n\n{0}", ex.Message), "Validation error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
                 XmlDocument doc = new XmlDocument();
                 XmlElement elRoot = (XmlElement)doc.AppendChild(doc.CreateElement("ConfigDataJob"));
                 XmlElement elJobConfig = (XmlElement)elRoot.AppendChild(doc.CreateElement("JobConfig"));
@@ -594,7 +677,10 @@ namespace AlexanderDevelopment.ConfigDataMover
 
             if (e.Error != null)
             {
-                MessageBox.Show(string.Format("An error prevented the job from executing: {0}", e.Error.ToString()),"Fatal job error",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show(string.Format("An error prevented the job from executing: {0}", e.Error.Message),"Fatal job error",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                JobError errorbox = new JobError();
+                errorbox.SetDetails(string.Format("An error prevented the job from executing: {0}", e.Error.Message), e.Error.ToString());
+                errorbox.ShowDialog();
             }
             else {
                 int errorCount = _importer.ErrorCount;

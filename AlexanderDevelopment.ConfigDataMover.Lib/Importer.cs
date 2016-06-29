@@ -270,6 +270,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
 
             Guid sourceBaseBu = Guid.Empty;
             Guid targetBaseBu = Guid.Empty;
+            Guid sourceBaseTeam = Guid.Empty;
+            Guid targetBaseTeam = Guid.Empty;
             Guid sourceBaseCurrency = Guid.Empty;
             Guid targetBaseCurrency = Guid.Empty;
 
@@ -279,6 +281,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                 if (MapBaseBu)
                 {
                     sourceBaseBu = _savedSourceData.BaseBu;
+                    sourceBaseTeam = _savedSourceData.BaseTeam;
                 }
                 if (MapBaseCurrency)
                 {
@@ -305,10 +308,25 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         </fetch>";
                             EntityCollection buEntities = service.RetrieveMultiple(new FetchExpression(baseBuFetchXml));
                             sourceBaseBu = (Guid)(buEntities[0]["businessunitid"]);
+
+                            string baseTeamFetchXml = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                          <entity name='team'>
+                            <attribute name='name' />
+                            <attribute name='businessunitid' />
+                            <attribute name='teamid' />
+                            <filter type='and'>
+                              <condition attribute='teamtype' operator='eq' value='0' />
+                              <condition attribute='isdefault' operator='eq' value='1' />
+                              <condition attribute='businessunitid' operator='eq' value='{0}' />
+                            </filter>
+                          </entity>
+                        </fetch>";
+                            EntityCollection teamEntities = service.RetrieveMultiple(new FetchExpression(string.Format(baseTeamFetchXml, sourceBaseBu)));
+                            sourceBaseTeam = (Guid)(teamEntities[0]["teamid"]);
                         }
                         catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
                         {
-                            string errormsg = string.Format(string.Format("could not retrieve source base business unit: {0}", ex.Message));
+                            string errormsg = string.Format(string.Format("could not retrieve source base business unit and team: {0}", ex.Message));
                             LogMessage("ERROR", errormsg);
                             throw new InvalidOperationException(errormsg);
                         }
@@ -358,6 +376,21 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         </fetch>";
                             EntityCollection buEntities = service.RetrieveMultiple(new FetchExpression(baseBuFetchXml));
                             targetBaseBu = (Guid)(buEntities[0]["businessunitid"]);
+
+                            string baseTeamFetchXml = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                          <entity name='team'>
+                            <attribute name='name' />
+                            <attribute name='businessunitid' />
+                            <attribute name='teamid' />
+                            <filter type='and'>
+                              <condition attribute='teamtype' operator='eq' value='0' />
+                              <condition attribute='isdefault' operator='eq' value='1' />
+                              <condition attribute='businessunitid' operator='eq' value='{0}' />
+                            </filter>
+                          </entity>
+                        </fetch>";
+                            EntityCollection teamEntities = service.RetrieveMultiple(new FetchExpression(string.Format(baseTeamFetchXml, targetBaseBu)));
+                            targetBaseTeam = (Guid)(teamEntities[0]["teamid"]);
                         }
                         catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
                         {
@@ -400,10 +433,17 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                     _mappings.Add(new GuidMapping { sourceId = sourceBaseBu, targetId = targetBaseBu });
                 }
 
+                LogMessage("INFO", "setting base business unit default team GUID mapping");
+                if (sourceBaseTeam != Guid.Empty && targetBaseTeam != Guid.Empty)
+                {
+                    _mappings.Add(new GuidMapping { sourceId = sourceBaseTeam, targetId = targetBaseTeam });
+                }
+
                 //if our target is a file, make sure we save the base BU
                 if (_isFileTarget)
                 {
                     _savedSourceData.BaseBu = sourceBaseBu;
+                    _savedSourceData.BaseTeam = sourceBaseTeam;
                 }
             }
 
@@ -491,11 +531,24 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
         void ValidateSteps()
         {
             LogMessage("INFO", "Validating job steps");
-            for(int i=0;i<JobSteps.Count;i++)
+
+            //load CRM fetchxml schema to use for validation later- https://msdn.microsoft.com/en-us/library/gg309405.aspx
+            XmlSchemaSet schemaSet = new XmlSchemaSet();
+            try
+            {
+                schemaSet.Add(null, "fetch.xsd");
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Could not load FetchXML XSD to use for validation.");
+            }
+
+            //loop through each job step
+            for (int i=0;i<JobSteps.Count;i++)
             {
                 LogMessage("INFO", string.Format("  Validating step {0} of {1}", i + 1, JobSteps.Count));
                 string errormsg = "";
-                if (string.IsNullOrEmpty(JobSteps[i].StepName))
+                if (string.IsNullOrWhiteSpace(JobSteps[i].StepName))
                 {
                     errormsg = string.Format("Job steps validation failed - Step #{0} has no name", i + 1);
                     LogMessage("ERROR", errormsg);
@@ -503,7 +556,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                 }
                 LogMessage("INFO", string.Format("    Non-empty step name"));
 
-                if (string.IsNullOrEmpty(JobSteps[i].StepFetch))
+                if (string.IsNullOrWhiteSpace(JobSteps[i].StepFetch))
                 {
                     errormsg = string.Format("Job steps validation failed - Step \"{0}\" has no query statement", JobSteps[i].StepName);
                     LogMessage("ERROR", errormsg);
@@ -511,9 +564,6 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                 }
                 LogMessage("INFO", string.Format("    Non-empty query"));
 
-                //load CRM fetchxml schema - https://msdn.microsoft.com/en-us/library/gg309405.aspx
-                XmlSchemaSet schemaSet = new XmlSchemaSet();
-                schemaSet.Add(null, "fetch.xsd");
                 XmlReaderSettings settings = new XmlReaderSettings();
                 settings.Schemas.Add(schemaSet);
                 settings.ValidationEventHandler += (sender, args) =>
@@ -530,16 +580,34 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                     throw new Exception(errormsg);
                 };
                 settings.ValidationType = ValidationType.Schema;
+                try
+                {
+                    //create an xmlreader from the step fetch with the validation settings from above
+                    StringReader stringReader = new StringReader(JobSteps[i].StepFetch);
+                    XmlReader xreader = XmlReader.Create(stringReader, settings);
 
-                //create an xmlreader from the step fetch with the validation settings from above
-                StringReader stringReader = new StringReader(JobSteps[i].StepFetch);
-                XmlReader xreader = XmlReader.Create(stringReader, settings);
-                
-                //read just to trigger the validation
-                while (xreader.Read()) { }
+                    //read just to trigger the validation
+                    while (xreader.Read()) { }
 
-                //close the reader
-                xreader.Close();
+                    //close the reader
+                    xreader.Close();
+                }
+                catch (XmlException ex)
+                {
+                    errormsg = string.Format("Job steps validation failed - Step \"{0}\" query could not be loaded or read", JobSteps[i].StepName);
+                    LogMessage("ERROR", errormsg);
+                    throw new Exception(errormsg);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    errormsg = string.Format("Job steps validation failed - Step \"{0}\" query could not be loaded or read", JobSteps[i].StepName);
+                    LogMessage("ERROR", errormsg);
+                    throw new Exception(errormsg);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
                 LogMessage("INFO", string.Format("    Valid FetchXML query"));
             }
         }
@@ -1094,6 +1162,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
     class ExportedData
     {
         public Guid BaseBu { get; set; }
+        public Guid BaseTeam { get; set; }
         public Guid BaseCurrency { get; set; }
         public List<List<ExportEntity>> RecordSets { get; set; }
 
@@ -1101,6 +1170,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
         {
             RecordSets = new List<List<ExportEntity>>();
             BaseBu = Guid.Empty;
+            BaseTeam = Guid.Empty;
             BaseCurrency = Guid.Empty;
             Entity e = new Entity();
         }

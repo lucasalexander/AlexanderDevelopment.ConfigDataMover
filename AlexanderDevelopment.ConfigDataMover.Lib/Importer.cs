@@ -33,6 +33,7 @@ using System.IO;
 using System.Text;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using System.Xml.Schema;
 
 namespace AlexanderDevelopment.ConfigDataMover.Lib
 {
@@ -485,6 +486,65 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
         }
 
         /// <summary>
+        /// method used to validate job steps before job actually starts running
+        /// </summary>
+        void ValidateSteps()
+        {
+            LogMessage("INFO", "Validating job steps");
+            for(int i=0;i<JobSteps.Count;i++)
+            {
+                LogMessage("INFO", string.Format("  Validating step {0} of {1}", i + 1, JobSteps.Count));
+                string errormsg = "";
+                if (string.IsNullOrEmpty(JobSteps[i].StepName))
+                {
+                    errormsg = string.Format("Job steps validation failed - Step #{0} has no name", i + 1);
+                    LogMessage("ERROR", errormsg);
+                    throw new Exception(errormsg);
+                }
+                LogMessage("INFO", string.Format("    Non-empty step name"));
+
+                if (string.IsNullOrEmpty(JobSteps[i].StepFetch))
+                {
+                    errormsg = string.Format("Job steps validation failed - Step \"{0}\" has no query statement", JobSteps[i].StepName);
+                    LogMessage("ERROR", errormsg);
+                    throw new Exception(errormsg);
+                }
+                LogMessage("INFO", string.Format("    Non-empty query"));
+
+                //load CRM fetchxml schema - https://msdn.microsoft.com/en-us/library/gg309405.aspx
+                XmlSchemaSet schemaSet = new XmlSchemaSet();
+                schemaSet.Add(null, "fetch.xsd");
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.Schemas.Add(schemaSet);
+                settings.ValidationEventHandler += (sender, args) =>
+                {
+                    if (args.Severity == XmlSeverityType.Warning)
+                    {
+                        errormsg = string.Format("Job steps validation failed - Step \"{0}\" matching schema not found.  No validation occurred. {1}", JobSteps[i].StepName, args.Message);
+                    }
+                    else
+                    {
+                        errormsg = string.Format("Job steps validation failed - Step \"{0}\" query schema validation error: {1}", JobSteps[i].StepName, args.Message);
+                    }
+                    LogMessage("ERROR", errormsg);
+                    throw new Exception(errormsg);
+                };
+                settings.ValidationType = ValidationType.Schema;
+
+                //create an xmlreader from the step fetch with the validation settings from above
+                StringReader stringReader = new StringReader(JobSteps[i].StepFetch);
+                XmlReader xreader = XmlReader.Create(stringReader, settings);
+                
+                //read just to trigger the validation
+                while (xreader.Read()) { }
+
+                //close the reader
+                xreader.Close();
+                LogMessage("INFO", string.Format("    Valid FetchXML query"));
+            }
+        }
+
+        /// <summary>
         /// runs the import process
         /// </summary>
         public void Process()
@@ -495,6 +555,9 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             //set up logging
             logger = LogManager.GetLogger(typeof(Importer));
             LogMessage("INFO", "starting job");
+
+            //validate job steps
+            ValidateSteps();
 
             //establish connections and/or read source data from file
             ParseConnections();

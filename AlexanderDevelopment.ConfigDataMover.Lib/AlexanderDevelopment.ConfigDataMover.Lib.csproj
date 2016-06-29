@@ -75,6 +75,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="AlexanderDevelopment.ConfigDataMover.Lib.licenseheader" />
+    <None Include="fetch.xsd">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

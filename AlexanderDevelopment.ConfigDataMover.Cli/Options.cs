@@ -1,7 +1,7 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // Options.cs
 //
-// Copyright 2015 Lucas Alexander
+// Copyright 2015-2017 Lucas Alexander
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Cli
                 AddDashesToOption = true
             };
             help.Copyright = @"
-Copyright 2015 Lucas Alexander
+Copyright 2015-2017 Lucas Alexander
 
 This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it and/or modify it under the terms of the Apache License, Version 2.0. You may obtain a copy at http://www.apache.org/licenses/LICENSE-2.0.
 ";

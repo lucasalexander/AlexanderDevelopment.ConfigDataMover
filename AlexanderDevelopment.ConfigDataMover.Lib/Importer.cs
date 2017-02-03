@@ -1,7 +1,7 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // Importer.cs
 //
-// Copyright 2015 Lucas Alexander
+// Copyright 2015-2017 Lucas Alexander
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.ServiceModel;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Query;
-using Microsoft.Xrm.Client;
-using Microsoft.Xrm.Client.Services;
+using Microsoft.Xrm.Tooling.Connector;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Discovery;
 using log4net;
@@ -50,13 +50,13 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
         public int ErrorCount { get { return _errorCount; } }
         private int _errorCount;
 
-        private static CrmConnection _sourceConn;
-        private static CrmConnection _targetConn;
+        private static CrmServiceClient _sourceClient;
+        private static CrmServiceClient _targetClient;
         private static string _sourceFile;
         private static string _targetFile;
         private static bool _isFileSource;
         private static bool _isFileTarget;
-        private static string _targetVersion = "0.0.0.0";
+        //private static string _targetVersion = "0.0.0.0";
 
         private static ExportedData _savedSourceData;
 
@@ -145,15 +145,12 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             }
             else
             {
-                _sourceConn = CrmConnection.Parse(SourceString);
-
-                //disable prompting for credentials
-                _sourceConn.ClientCredentials.SupportInteractive = false;
-
+                _sourceClient = new CrmServiceClient(SourceString);
+                
                 //validate login works
                 try
                 {
-                    using (OrganizationService service = new OrganizationService(_sourceConn))
+                    using (OrganizationServiceProxy service = _sourceClient.OrganizationServiceProxy)
                     {
                         string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                           <entity name='businessunit'>
@@ -188,15 +185,12 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             }
             else
             {
-                _targetConn = CrmConnection.Parse(TargetString);
-
-                //disable prompting for credentials
-                _targetConn.ClientCredentials.SupportInteractive = false;
+                _targetClient = new CrmServiceClient(TargetString);
 
                 //validate login works
                 try
                 {
-                    using (OrganizationService service = new OrganizationService(_targetConn))
+                    using (OrganizationServiceProxy service = _targetClient.OrganizationServiceProxy)
                     {
                         string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                           <entity name='businessunit'>
@@ -213,40 +207,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         //get the organization id
                         Guid orgId = ((WhoAmIResponse)service.Execute(new WhoAmIRequest())).OrganizationId;
 
-                        //if host is xxx.dynamics.com, then target is crm online
-                        if (_targetConn.ServiceUri.Host.EndsWith("dynamics.com"))
-                        {
-                            //assume target version is 7.1.0.0 - crm 2015 update 1 as a minimum
-                            _targetVersion = "7.1.0.0";
-
-                            //log target version
-                            LogMessage("INFO", "target is - CRM online");
-                            LogMessage("INFO", "assuming target version is - " + _targetVersion);
-                        }
-                        else {
-
-                            //query discovery service to determine version of target organization
-                            var discoveryService = new DiscoveryService(_targetConn);
-                            RetrieveOrganizationsRequest orgsRequest =
-                            new RetrieveOrganizationsRequest()
-                            {
-                                AccessType = EndpointAccessType.Default,
-                                Release = OrganizationRelease.Current
-                            };
-                            RetrieveOrganizationsResponse organizations =
-                                (RetrieveOrganizationsResponse)discoveryService.Execute(orgsRequest);
-                            foreach (OrganizationDetail organization in organizations.Details)
-                            {
-                                if (organization.OrganizationId == orgId)
-                                {
-                                    //set target version variable for use later
-                                    _targetVersion = organization.OrganizationVersion;
-
-                                    //log target version
-                                    LogMessage("INFO", "target version is - " + _targetVersion);
-                                }
-                            }
-                        }
+                        LogMessage("INFO", "target version is - " + _targetClient.ConnectedOrgVersion.ToString());
                     }
                 }
                 catch (Exception ex)
@@ -290,7 +251,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             }
             else //otherwise we need to look them up in the source org
             {
-                using (OrganizationService service = new OrganizationService(_sourceConn))
+                using (OrganizationServiceProxy service = _sourceClient.OrganizationServiceProxy)
                 {
                     if (MapBaseBu)
                     {
@@ -358,7 +319,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             //if we're not writing data to a target crm org instead of a file, we need to look up the target base BU and currency
             if (!_isFileTarget)
             {
-                using (OrganizationService service = new OrganizationService(_targetConn))
+                using (OrganizationServiceProxy service = _targetClient.OrganizationServiceProxy)
                 {
                     if (MapBaseBu)
                     {
@@ -617,8 +578,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
         /// </summary>
         public void Process()
         {
-            OrganizationService sourceService = null;
-            OrganizationService targetService = null;
+            OrganizationServiceProxy sourceService = null;
+            OrganizationServiceProxy targetService = null;
 
             //set up logging
             logger = LogManager.GetLogger(typeof(Importer));
@@ -633,11 +594,11 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             //connect to source and target if necessary
             if (!_isFileSource)
             {
-                sourceService = new OrganizationService(_sourceConn);
+                sourceService = _sourceClient.OrganizationServiceProxy;
             }
             if (!_isFileTarget)
             {
-                targetService = new OrganizationService(_targetConn);
+                targetService = _targetClient.OrganizationServiceProxy;
             }
 
             //create the guid mappings table
@@ -711,8 +672,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                     if (!_isFileTarget)
                     {
                         //check target crm version so we know its capabilities for specialized operations - https://msdn.microsoft.com/en-us/library/dn932124(v=crm.7).aspx
-                        int majorversion = int.Parse(_targetVersion.Split(".".ToCharArray())[0]);
-                        int minorversion = int.Parse(_targetVersion.Split(".".ToCharArray())[1]);
+                        int majorversion = _targetClient.ConnectedOrgVersion.Major;
+                        int minorversion = _targetClient.ConnectedOrgVersion.Minor;
 
                         //set variable to hold operation type - create or update
                         operationTypes importoperation = new operationTypes();

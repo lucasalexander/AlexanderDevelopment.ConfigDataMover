@@ -35,9 +35,10 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 9);
+            this.label1.Location = new System.Drawing.Point(24, 18);
+            this.label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(161, 52);
+            this.label1.Size = new System.Drawing.Size(294, 100);
             this.label1.TabIndex = 0;
             this.label1.Text = "Current version: x.x.x.x\r\n\r\nLatest release version: y.y.y.y\r\nLatest release date:" +
     " mm/dd/yyyy";
@@ -45,9 +46,10 @@
             // linkLabel1
             // 
             this.linkLabel1.AutoSize = true;
-            this.linkLabel1.Location = new System.Drawing.Point(12, 88);
+            this.linkLabel1.Location = new System.Drawing.Point(24, 169);
+            this.linkLabel1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(146, 13);
+            this.linkLabel1.Size = new System.Drawing.Size(267, 25);
             this.linkLabel1.TabIndex = 1;
             this.linkLabel1.TabStop = true;
             this.linkLabel1.Text = "View latest release on GitHub";
@@ -56,11 +58,13 @@
             // 
             // CheckLatestVersion
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(230, 110);
+            this.ClientSize = new System.Drawing.Size(460, 211);
             this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.label1);
+            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "CheckLatestVersion";

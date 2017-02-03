@@ -1,22 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// SetConnection.cs
-//
-// Copyright 2017 Lucas Alexander
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-// --------------------------------------------------------------------------------------------------------------------
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -26,9 +8,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Query;
-using Microsoft.Xrm.Tooling.Connector;
+using Microsoft.Xrm.Client;
+using Microsoft.Crm.Sdk.Messages;
+using Microsoft.Xrm.Client.Services;
 
 namespace AlexanderDevelopment.ConfigDataMover
 {
@@ -83,9 +66,6 @@ namespace AlexanderDevelopment.ConfigDataMover
 
                     if (dict.ContainsKey("PASSWORD"))
                         passwordTextbox.Text = dict["PASSWORD"];
-
-                    if (dict.ContainsKey("AUTHTYPE"))
-                        authtypeComboBox.SelectedItem = dict["AUTHTYPE"];
                 }
             }
             else
@@ -121,23 +101,15 @@ namespace AlexanderDevelopment.ConfigDataMover
             }
             else
             {
-                if(authtypeComboBox.SelectedIndex<0)
-                {
-                    MessageBox.Show("Must select auth type.");
-                    return;
-
-                }
                 if (validateUrl(serverTextbox.Text))
                 {
                     if (!string.IsNullOrWhiteSpace(domainTextbox.Text))
                     {
-                        connectionString = string.Format("url={0};username={1};domain={2};password={3};authtype={4};", serverTextbox.Text, usernameTextbox.Text, domainTextbox.Text, passwordTextbox.Text, authtypeComboBox.SelectedItem);
-                        connectionString += "RequireNewInstance=true;";
+                        connectionString = string.Format("url={0};username={1};domain={2};password={3};", serverTextbox.Text, usernameTextbox.Text, domainTextbox.Text, passwordTextbox.Text);
                     }
                     else
                     {
-                        connectionString = string.Format("url={0};username={1};password={2};authtype={3};", serverTextbox.Text, usernameTextbox.Text, passwordTextbox.Text, authtypeComboBox.SelectedItem);
-                        connectionString += "RequireNewInstance=true;";
+                        connectionString = string.Format("url={0};username={1};password={2};", serverTextbox.Text, usernameTextbox.Text, passwordTextbox.Text);
                     }
                 }
                 else
@@ -232,30 +204,21 @@ namespace AlexanderDevelopment.ConfigDataMover
         {
             testConnectionButton.Enabled = false;
             string connectionString = string.Empty;
-            if (authtypeComboBox.SelectedIndex < 0)
-            {
-                MessageBox.Show("Must select auth type.");
-                return;
-
-            }
             if (validateUrl(serverTextbox.Text))
             {
                 if (!string.IsNullOrWhiteSpace(domainTextbox.Text))
                 {
-                    connectionString = string.Format("url={0};username={1};domain={2};password={3};authtype={4};", serverTextbox.Text, usernameTextbox.Text, domainTextbox.Text, passwordTextbox.Text, authtypeComboBox.SelectedItem);
-                    connectionString += "RequireNewInstance=true;";
+                    connectionString = string.Format("url={0};username={1};domain={2};password={3};", serverTextbox.Text, usernameTextbox.Text, domainTextbox.Text, passwordTextbox.Text);
                 }
                 else
                 {
-                    connectionString = string.Format("url={0};username={1};password={2};authtype={3};", serverTextbox.Text, usernameTextbox.Text, passwordTextbox.Text, authtypeComboBox.SelectedItem);
-                    connectionString += "RequireNewInstance=true;";
+                    connectionString = string.Format("url={0};username={1};password={2};", serverTextbox.Text, usernameTextbox.Text, passwordTextbox.Text);
                 }
                 try
                 {
-                    Microsoft.Xrm.Tooling.Connector.TraceControlSettings.TraceLevel = System.Diagnostics.SourceLevels.All;
-                    Microsoft.Xrm.Tooling.Connector.TraceControlSettings.AddTraceListener(new System.Diagnostics.TextWriterTraceListener("ConnectionTest.log"));
-                    CrmServiceClient testConnection = new CrmServiceClient(connectionString);
-                    using (OrganizationServiceProxy service = testConnection.OrganizationServiceProxy)
+                    CrmConnection testConnection = CrmConnection.Parse(connectionString);
+                    testConnection.ClientCredentials.SupportInteractive = false;
+                    using (OrganizationService service = new OrganizationService(testConnection))
                     {
                         string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                           <entity name='businessunit'>

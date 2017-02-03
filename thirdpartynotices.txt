@@ -15,7 +15,7 @@ Apache log4net
 	Original copyright:	Copyright 2004-2015 The Apache Software Foundation
 	Original license:	Apache License - http://logging.apache.org/log4net/license.html
  
-Microsoft Dynamics 365 SDK
-	Original download:	https://msdn.microsoft.com/en-us/library/hh547453.aspx
+Microsoft Dynamics CRM SDK
+	Original download:	https://msdn.microsoft.com/en-us/library/hh547453(v=crm.7).aspx
 	Original copyright:	Microsoft
-	Original license:	Microsoft Dynamics 365 EULA (see included mscrmeula.txt file)
+	Original license:	Microsoft Dynamics CRM EULA (see included mscrmeula.txt file)

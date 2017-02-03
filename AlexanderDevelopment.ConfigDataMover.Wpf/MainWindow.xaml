@@ -26,7 +26,7 @@
                 <MenuItem Header="Run job" Click="runJobButton_Click">
                 </MenuItem>
                 <MenuItem Header="_Help">
-                    <MenuItem Header="About" HorizontalAlignment="Left" Width="auto"/>
+                    <MenuItem Header="About" HorizontalAlignment="Left" Width="auto" Click="aboutMenuItem_Click"/>
                     <MenuItem Header="Check for upgrades" HorizontalAlignment="Left" Width="auto"/>
                 </MenuItem>
             </Menu>

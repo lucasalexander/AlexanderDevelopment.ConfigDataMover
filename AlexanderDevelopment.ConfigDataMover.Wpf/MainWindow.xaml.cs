@@ -607,6 +607,12 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                 }
             }
         }
+
+        private void aboutMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            About about = new About();
+            about.Show();
+        }
     }
 
     public static class Utility

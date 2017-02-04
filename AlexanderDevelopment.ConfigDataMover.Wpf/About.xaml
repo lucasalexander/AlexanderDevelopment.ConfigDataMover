@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AlexanderDevelopment.ConfigDataMover.Wpf"
         mc:Ignorable="d"
-        Title="About" Height="400" Width="600">
+        Title="About" Height="400" Width="600" ResizeMode="NoResize" ShowInTaskbar="False">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>

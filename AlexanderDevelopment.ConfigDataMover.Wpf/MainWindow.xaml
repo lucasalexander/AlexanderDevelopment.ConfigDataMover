@@ -5,141 +5,129 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AlexanderDevelopment.ConfigDataMover.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="820" Width="720">
+        Title="Alexander Development Configuration Data Mover" Height="560" Width="750" ResizeMode="CanResize">
     <DockPanel>
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem>
                 <Label x:Name="statusLabel"></Label>
             </StatusBarItem>
         </StatusBar>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-        </Grid.RowDefinitions>
-        <StackPanel VerticalAlignment="Top" Margin="0,0,0.333,0" Grid.Row="0">
-            <Menu Width="Auto" Height="20">
-                <MenuItem Header="_File">
-                    <MenuItem Header="Open job" HorizontalAlignment="Left" Width="auto" Click="openJobButton_Click"/>
-                    <MenuItem  Header="Save job" HorizontalAlignment="Left" Width="auto" Click="saveJobButton_Click"/>
-                </MenuItem>
-                <MenuItem Header="Run job" Click="runJobButton_Click">
-                </MenuItem>
-                <MenuItem Header="_Help">
-                    <MenuItem Header="About" HorizontalAlignment="Left" Width="auto" Click="aboutMenuItem_Click"/>
-                    <MenuItem Header="Check for upgrades" HorizontalAlignment="Left" Width="auto"/>
-                </MenuItem>
-            </Menu>
-        </StackPanel>
-            <Grid Margin="5" Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="180" />
-                <RowDefinition Height="330" />
-                    <RowDefinition Height="230" />
-                </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="auto" />
-            </Grid.ColumnDefinitions>
-            <GroupBox x:Name="jobdetailsGroupBox" Header="Configuration job data details"
-                  HorizontalAlignment="Left" Height="auto" Margin="5" 
-                  VerticalAlignment="Top" Width="520"
-                      Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
-                <Grid Margin="5" x:Name="jobdetailsGrid">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="200" />
-                    </Grid.ColumnDefinitions>
-                    <Button Grid.Row="0" Grid.Column="0" Content="Select source" Margin="5" Padding="5"></Button>
-                    <Label x:Name="sourceLabel" Grid.Row="0" Grid.Column="1" Content="select a source connection . . ." Width="400" Margin="5"/>
-                    <Button Grid.Row="1" Grid.Column="0" Content="Select target" Margin="5" Padding="5"></Button>
-                        <Label x:Name="targetLabel" Grid.Row="1" Grid.Column="1" Content="select a target connection . . ." Width="400" Margin="5"/>
-                    <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5">
-                        <CheckBox x:Name="saveConnectionsCheckBox" Content="Save connection details?" Margin="2"></CheckBox>
-                        <CheckBox x:Name="mapBuCheckBox" Content="Map root business unit GUID?" Margin="2"></CheckBox>
-                        <CheckBox x:Name="mapCurrencyCheckBox" Content="Map base currency GUID?" Margin="2"></CheckBox>
-                    </StackPanel>
-                </Grid>
-            </GroupBox>
-            <GroupBox Header="Job steps" Grid.Row="1" Grid.Column="0" Margin="5">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <ListBox x:Name="stepListBox" Height="250" Margin="5" HorizontalAlignment="Left" 
-                             Width="150" VerticalAlignment="Top"
-                             SelectionChanged="stepListBox_SelectedIndexChanged"
-                             ScrollViewer.CanContentScroll="True"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto"
-                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
-
-                             />
-                    <Button Click="moveUpButton_Click" Content="Move up" Grid.Column="1" Grid.Row="0" Width="auto" Padding="5" Margin="5,10" Height="auto" VerticalAlignment="Top"></Button>
-                    <Button Click="moveDownButton_Click" Content="Move down" Grid.Column="1" Grid.Row="0" Width="auto" Padding="5" Margin="5,50" Height="auto" VerticalAlignment="Top"></Button>
-                    <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="1">
-                        <Button Click="addStepButton_Click" Content="Add step"  HorizontalAlignment="Left" Width="auto" Padding="5" Height="auto" Margin="5" VerticalAlignment="Top"></Button>
-                        <Button Click="removeStepButton_Click" Content="Remove step" HorizontalAlignment="Left" Width="auto" Padding="5" Height="auto" Margin="5" VerticalAlignment="Top"></Button>
-                        <Button Click="clearAllButton_Click" Content="Clear steps" HorizontalAlignment="Left" Width="auto" Padding="5" Height="auto" Margin="5" VerticalAlignment="Top"></Button>
+        <Menu Width="Auto" Height="20" DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="Open job" HorizontalAlignment="Left" Width="auto" Click="openJobButton_Click"/>
+                <MenuItem  Header="Save job" HorizontalAlignment="Left" Width="auto" Click="saveJobButton_Click"/>
+            </MenuItem>
+            <MenuItem Header="Run job" Click="runJobButton_Click">
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="About" HorizontalAlignment="Left" Width="auto" Click="aboutMenuItem_Click"/>
+                <MenuItem Header="Check for upgrades" HorizontalAlignment="Left" Width="auto" Click="checkversionMenuItem_Click"/>
+            </MenuItem>
+        </Menu>
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Vertical">
+                <Expander Header="Configuration job settings"
+                        HorizontalAlignment="Left" Height="auto" Margin="2"  
+                        VerticalAlignment="Top" Width="650"
+                          IsExpanded="True">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Select source" Width="85" Margin="5" Padding="5" Click="setsourceButton_Click"></Button>
+                            <Label x:Name="sourceLabel" Content="select a source connection . . ." Width="400" Margin="5"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Select target" Width="85" Margin="5" Padding="5" Click="settargetButton_Click"></Button>
+                            <Label x:Name="targetLabel" Content="select a target connection . . ." Width="400" Margin="5"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="5">
+                            <CheckBox x:Name="saveConnectionsCheckBox" Content="Save connection details?" Margin="2"></CheckBox>
+                            <CheckBox x:Name="mapBuCheckBox" Content="Map root business unit GUID?" Margin="2"></CheckBox>
+                            <CheckBox x:Name="mapCurrencyCheckBox" Content="Map base currency GUID?" Margin="2"></CheckBox>
+                        </StackPanel>
 
                     </StackPanel>
-                </Grid>
-            </GroupBox>
-            <GroupBox Header="Step details" Grid.Row="1" Grid.Column="1" Margin="5">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                        <Label Content="Step name:" Margin="5"></Label>
-                        <TextBox x:Name="stepNameTextBox" Width="200" Margin="5"></TextBox>
+                </Expander>
+                <Expander Header="Job steps" IsExpanded="True" Margin="2">
+                    <StackPanel Orientation="Horizontal">
+                        <GroupBox Header="Steps" Margin="2" Width="250">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <ListBox x:Name="stepListBox" FontSize="11" Height="235" Margin="2" HorizontalAlignment="Left" 
+                                    Width="150" VerticalAlignment="Top"
+                                    SelectionChanged="stepListBox_SelectedIndexChanged"
+                                    ScrollViewer.CanContentScroll="True"
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+
+                                    />
+                                <Button Click="moveUpButton_Click" Content="Move up" Grid.Column="1" Grid.Row="0" Width="auto" Padding="5" Margin="5,10" Height="auto" VerticalAlignment="Top"></Button>
+                                <Button Click="moveDownButton_Click" Content="Move down" Grid.Column="1" Grid.Row="0" Width="auto" Padding="5" Margin="5,50" Height="auto" VerticalAlignment="Top"></Button>
+                                <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="1">
+                                    <Button Click="addStepButton_Click" Content="Add step"  HorizontalAlignment="Left" Width="auto" Padding="5" Height="auto" Margin="5" VerticalAlignment="Top"></Button>
+                                    <Button Click="removeStepButton_Click" Content="Remove step" HorizontalAlignment="Left" Width="auto" Padding="5" Height="auto" Margin="5" VerticalAlignment="Top"></Button>
+                                    <Button Click="clearAllButton_Click" Content="Clear steps" HorizontalAlignment="Left" Width="auto" Padding="5" Height="auto" Margin="5" VerticalAlignment="Top"></Button>
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Header="Step details" Margin="2" Width="450">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="12*"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2">
+                                    <Label Content="Step name:" Margin="5" VerticalAlignment="Top"></Label>
+                                    <TextBox x:Name="stepNameTextBox" FontSize="11" VerticalAlignment="Top" Width="150" Margin="5"></TextBox>
+                                    <CheckBox x:Name="updateOnlyCheckBox" VerticalAlignment="Top" Height="Auto" Content="Update only step?" Margin="5"></CheckBox>
+                                </StackPanel>
+                                <TextBox x:Name="stepFetchTextBox" Grid.Row="1"
+                                    Height="200" Width="420" Margin="5,5,-67,0"
+                                    ScrollViewer.CanContentScroll="True" HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                    AcceptsReturn="True"
+                                    FontSize="11" Grid.ColumnSpan="2"
+                                    ></TextBox>
+                                <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.ColumnSpan="2">
+                                    <Button Click="updateStepButton_Click" Height="Auto" Content="Update step definition" Width="Auto" HorizontalAlignment="Left" Padding="5" Margin="5"></Button>
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
                     </StackPanel>
-                    <TextBox x:Name="stepFetchTextBox" Grid.Row="1" Grid.Column="0" 
-                             Height="180" Width="400" Margin="5"
-                             ScrollViewer.CanContentScroll="True"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto"
-                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                             AcceptsReturn="True"
-                             ></TextBox>
-                    <CheckBox x:Name="updateOnlyCheckBox" Grid.Row="2" Grid.Column="0" Height="Auto" Content="Update only step?" Margin="5"></CheckBox>
-                    <Button Click="updateStepButton_Click" Grid.Row="3" Grid.Column="0" Height="Auto" Content="Update step definition" Width="Auto" HorizontalAlignment="Left" Padding="5" Margin="5"></Button>
-                </Grid>
-            </GroupBox>
-            <GroupBox Header="GUID mappings" Grid.Row="2" Grid.Column="0" Margin="5" Grid.ColumnSpan="2">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="mappingsTextBox" Grid.Row="0" Grid.Column="0" 
-                             Height="140" Width="600" Margin="5"
-                             ScrollViewer.CanContentScroll="True"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto"
-                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                             AcceptsReturn="True"
-                             ></TextBox>
-                    <Button Click="clearAllMappingsButton_Click" Content="Clear mappings" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left" Width="auto" Padding="5" Height="auto" Margin="5" VerticalAlignment="Top"></Button>
-                </Grid>
-            </GroupBox>
-        </Grid>
-    </Grid>
+                </Expander>
+                <Expander Header="GUID mappings" Margin="2" Width="500" HorizontalAlignment="Left" IsExpanded="True" >
+                    <StackPanel>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <TextBox x:Name="mappingsTextBox" Grid.Row="0" 
+                                    Height="100" Width="420" Margin="5"
+                                    ScrollViewer.CanContentScroll="True"
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                    AcceptsReturn="True" FontSize="11"
+                                     HorizontalAlignment="Left"
+                                    ></TextBox>
+                            <Button Click="clearAllMappingsButton_Click" Content="Clear GUID mappings" Grid.Row="1" HorizontalAlignment="Left" Width="auto" Padding="5" Height="auto" Margin="5,4.667,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"></Button>
+                        </Grid>
+                    </StackPanel>
+                </Expander>
+            </StackPanel>
+        </ScrollViewer>
     </DockPanel>
 </Window>

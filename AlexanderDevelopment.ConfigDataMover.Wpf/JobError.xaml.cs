@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// Program.cs
+// JobError.xaml.cs
 //
 // Copyright 2015-2017 Lucas Alexander
 // 
@@ -19,22 +19,44 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
-namespace AlexanderDevelopment.ConfigDataMover
+namespace AlexanderDevelopment.ConfigDataMover.Wpf
 {
-    static class Program
+    /// <summary>
+    /// Interaction logic for JobError.xaml
+    /// </summary>
+    public partial class JobError : Window
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
+        public JobError()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            InitializeComponent();
+        }
+
+        public void SetDetails(string label, string details)
+        {
+            messageTextBox.Text = label;
+            errorTextBox.Text = details;
+        }
+
+        private void closeButton_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(errorTextBox.Text);
         }
     }
 }

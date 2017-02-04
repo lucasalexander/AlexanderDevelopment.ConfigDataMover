@@ -1,4 +1,22 @@
-﻿using System;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// MainWindow.xaml.cs
+//
+// Copyright 2015-2017 Lucas Alexander
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// --------------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,6 +50,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
             _stepCounter = 0;
             _source = string.Empty;
             _target = string.Empty;
+            Application.Current.MainWindow = this;
         }
 
         protected void openJobButton_Click(object sender, EventArgs args)
@@ -294,10 +313,10 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
 
             if (e.Error != null)
             {
-                MessageBox.Show(string.Format("An error prevented the job from executing: {0}", e.Error.Message), "Fatal job error", MessageBoxButton.OK, MessageBoxImage.Error);
-                //JobError errorbox = new JobError();
-                //errorbox.SetDetails(string.Format("An error prevented the job from executing: {0}", e.Error.Message), e.Error.ToString());
-                //errorbox.ShowDialog();
+                //MessageBox.Show(string.Format("An error prevented the job from executing: {0}", e.Error.Message), "Fatal job error", MessageBoxButton.OK, MessageBoxImage.Error);
+                JobError errorbox = new JobError();
+                errorbox.SetDetails(string.Format("An error prevented the job from executing: {0}", e.Error.Message), e.Error.ToString());
+                errorbox.ShowDialog();
             }
             else
             {
@@ -612,6 +631,24 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
         {
             About about = new About();
             about.Show();
+        }
+
+        private void checkversionMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            CheckLatestVersion checkversion = new CheckLatestVersion();
+            checkversion.Show();
+        }
+
+        private void setsourceButton_Click(object sender, RoutedEventArgs e)
+        {
+            SetConnection setconnection = new SetConnection(_source, true);
+            setconnection.Show();
+        }
+
+        private void settargetButton_Click(object sender, RoutedEventArgs e)
+        {
+            SetConnection setconnection = new SetConnection(_target, false);
+            setconnection.Show();
         }
     }
 

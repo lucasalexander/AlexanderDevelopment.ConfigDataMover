@@ -108,7 +108,7 @@
                         </GroupBox>
                     </StackPanel>
                 </Expander>
-                <Expander Header="GUID mappings" Margin="2" Width="500" HorizontalAlignment="Left" IsExpanded="True" >
+                <Expander Header="GUID mappings" Margin="2" Width="620" HorizontalAlignment="Left" IsExpanded="True" >
                     <StackPanel>
                         <Grid>
                             <Grid.RowDefinitions>
@@ -116,7 +116,7 @@
                                 <RowDefinition Height="Auto"></RowDefinition>
                             </Grid.RowDefinitions>
                             <TextBox x:Name="mappingsTextBox" Grid.Row="0" 
-                                    Height="100" Width="420" Margin="5"
+                                    Height="100" Width="600" Margin="5"
                                     ScrollViewer.CanContentScroll="True"
                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
                                     ScrollViewer.HorizontalScrollBarVisibility="Auto"

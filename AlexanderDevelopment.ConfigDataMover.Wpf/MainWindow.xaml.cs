@@ -630,25 +630,25 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
         private void aboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
             About about = new About();
-            about.Show();
+            about.ShowDialog();
         }
 
         private void checkversionMenuItem_Click(object sender, RoutedEventArgs e)
         {
             CheckLatestVersion checkversion = new CheckLatestVersion();
-            checkversion.Show();
+            checkversion.ShowDialog();
         }
 
         private void setsourceButton_Click(object sender, RoutedEventArgs e)
         {
             SetConnection setconnection = new SetConnection(_source, true);
-            setconnection.Show();
+            setconnection.ShowDialog();
         }
 
         private void settargetButton_Click(object sender, RoutedEventArgs e)
         {
             SetConnection setconnection = new SetConnection(_target, false);
-            setconnection.Show();
+            setconnection.ShowDialog();
         }
     }
 

@@ -289,6 +289,34 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
             }
             testConnectionButton.IsEnabled = true;
         }
+
+        private void fileButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Create OpenFileDialog 
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+            // Set filter for file extension and default file extension 
+            dlg.DefaultExt = ".json";
+            dlg.Filter = "JSON Files (*.json)|*.json|TXT Files (*.txt)|*.txt";
+
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            Nullable<bool> result = dlg.ShowDialog();
+
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                // Open document 
+                string filename = dlg.FileName;
+                pathTextBox.Text = filename;
+            }
+        }
+
+        private void createNewButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 
 }

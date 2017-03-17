@@ -45,16 +45,17 @@
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
-            <GroupBox Header="File settings">
+            <GroupBox Header="File settings" Margin="0,0,-0.4,0">
                 <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal">
-                        <Label Margin="2" HorizontalAlignment="Left" Width="65">File path</Label>
-                        <TextBox x:Name="pathTextBox" Margin="2" Height="20" HorizontalAlignment="Left" Width="450"></TextBox>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,-0.2,0">
+                        <Label Margin="2" HorizontalAlignment="Left" Width="65" Content="File path"/>
+                        <TextBox x:Name="pathTextBox" Margin="2" Height="20" HorizontalAlignment="Left" Width="390"/>
+                        <Button x:Name="selectExistingButton" Content="Browse" Padding="2" Click="fileButton_Click" Margin="10,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" />
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Padding="2" Content="Update connection" Click="setConnectionButton_Click" HorizontalAlignment="Center" Margin="0, 10" VerticalAlignment="Top"></Button>
+                <Button Padding="2" Content="Update connection" Click="setConnectionButton_Click" HorizontalAlignment="Left" Margin="0, 10" VerticalAlignment="Top"></Button>
                 <Button Padding="2" Content="Cancel" Click="cancelButton_Click" HorizontalAlignment="Left" Margin="10, 10" VerticalAlignment="Top"></Button>
             </StackPanel>
         </StackPanel>

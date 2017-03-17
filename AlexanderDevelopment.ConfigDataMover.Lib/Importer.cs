@@ -732,61 +732,80 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                     entity[attribute.Key] = attribute.Value;
                                 }
 
-                                //try to update first
-                                try
+                                //if create-only step
+                                if (step.CreateOnly)
                                 {
-                                    //if version is below 7.1 then remove statecode and statuscode attributes from entity attribute collection
-                                    //if version is 7.1 or later, setting statecode and statuscode in an update will work fine
-                                    if (majorversion < 7 || (majorversion == 7 && minorversion < 1))
-                                    {
-                                        LogMessage("INFO", "    removing statecode/statuscode");
-                                        if (entity.Attributes.Contains("statecode"))
-                                            entity.Attributes.Remove("statecode");
+                                    //remove statecode and statuscode if they are still included in entity attribute collection
+                                    if (entity.Attributes.Contains("statecode"))
+                                        entity.Attributes.Remove("statecode");
 
-                                        if (entity.Attributes.Contains("statuscode"))
-                                            entity.Attributes.Remove("statuscode");
-                                    }
-                                    importoperation = operationTypes.Update;
-                                    LogMessage("INFO", "    trying target update");
-                                    targetService.Update(entity);
-                                    LogMessage("INFO", "    update ok");
+                                    if (entity.Attributes.Contains("statuscode"))
+                                        entity.Attributes.Remove("statuscode");
+
+                                    importoperation = operationTypes.Create;
+                                    LogMessage("INFO", "    trying target create");
+                                    targetService.Create(entity);
+                                    LogMessage("INFO", "    create ok");
+
                                 }
-                                catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
+                                else
                                 {
-                                    //only try a create if it's not an updateonly step
-                                    if (!step.UpdateOnly)
+                                    //try to update first
+                                    try
                                     {
-                                        //remove statecode and statuscode if they are still included in entity attribute collection
-                                        if (entity.Attributes.Contains("statecode"))
-                                            entity.Attributes.Remove("statecode");
-
-                                        if (entity.Attributes.Contains("statuscode"))
-                                            entity.Attributes.Remove("statuscode");
-
-                                        //only try the create step if the update failed because the record doesn't already exist to update
-                                        if (ex.Message.ToUpper().EndsWith("DOES NOT EXIST"))
+                                        //if version is below 7.1 then remove statecode and statuscode attributes from entity attribute collection
+                                        //if version is 7.1 or later, setting statecode and statuscode in an update will work fine
+                                        if (majorversion < 7 || (majorversion == 7 && minorversion < 1))
                                         {
-                                            importoperation = operationTypes.Create;
-                                            LogMessage("INFO", "    trying target create");
-                                            //if update fails and step is not update-only then try to create
-                                            targetService.Create(entity);
-                                            LogMessage("INFO", "    create ok");
+                                            LogMessage("INFO", "    removing statecode/statuscode");
+                                            if (entity.Attributes.Contains("statecode"))
+                                                entity.Attributes.Remove("statecode");
+
+                                            if (entity.Attributes.Contains("statuscode"))
+                                                entity.Attributes.Remove("statuscode");
                                         }
-                                        else //if the update failed for any reason other than "does not exist" we have a problem and don't want to try the create step
+                                        importoperation = operationTypes.Update;
+                                        LogMessage("INFO", "    trying target update");
+                                        targetService.Update(entity);
+                                        LogMessage("INFO", "    update ok");
+                                    }
+                                    catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
+                                    {
+                                        //only try a create if it's not an updateonly step
+                                        if (!step.UpdateOnly)
+                                        {
+                                            //remove statecode and statuscode if they are still included in entity attribute collection
+                                            if (entity.Attributes.Contains("statecode"))
+                                                entity.Attributes.Remove("statecode");
+
+                                            if (entity.Attributes.Contains("statuscode"))
+                                                entity.Attributes.Remove("statuscode");
+
+                                            //only try the create step if the update failed because the record doesn't already exist to update
+                                            if (ex.Message.ToUpper().EndsWith("DOES NOT EXIST"))
+                                            {
+                                                importoperation = operationTypes.Create;
+                                                LogMessage("INFO", "    trying target create");
+                                                //if update fails and step is not update-only then try to create
+                                                targetService.Create(entity);
+                                                LogMessage("INFO", "    create ok");
+                                            }
+                                            else //if the update failed for any reason other than "does not exist" we have a problem and don't want to try the create step
+                                            {
+                                                //don't do the specialized operation steps (assign, setstate)
+                                                executeSpecializedOperations = false;
+
+                                                LogMessage("INFO", string.Format("    update failed: {0}", ex.Message));
+                                                throw new FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault>(ex.Detail);
+                                            }
+                                        }
+                                        else
                                         {
                                             //don't do the specialized operation steps (assign, setstate)
                                             executeSpecializedOperations = false;
 
-                                            LogMessage("INFO", string.Format("    update failed: {0}", ex.Message));
                                             throw new FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault>(ex.Detail);
                                         }
-                                    }
-                                    else
-                                    {
-                                        //don't do the specialized operation steps (assign, setstate)
-                                        executeSpecializedOperations = false;
-
-                                        throw new FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault>(ex.Detail);
                                     }
                                 }
 

@@ -88,9 +88,14 @@
                                     <RowDefinition Height="Auto"></RowDefinition>
                                 </Grid.RowDefinitions>
                                 <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2">
-                                    <Label Content="Step name:" Margin="5" VerticalAlignment="Top"></Label>
-                                    <TextBox x:Name="stepNameTextBox" FontSize="11" VerticalAlignment="Top" Width="150" Margin="5"></TextBox>
-                                    <CheckBox x:Name="updateOnlyCheckBox" VerticalAlignment="Top" Height="Auto" Content="Update only step?" Margin="5"></CheckBox>
+                                    <Label Content="Step name:" Margin="2" VerticalAlignment="Center"></Label>
+                                    <TextBox x:Name="stepNameTextBox" FontSize="11" VerticalAlignment="Center" Width="150" Margin="2"></TextBox>
+                                    <Label Content="Step type:" Margin="2" VerticalAlignment="Center"></Label>
+                                    <ComboBox x:Name="stepTypeComboBox" VerticalAlignment="Center" Height="Auto" Margin="2" SelectedValuePath="Content">
+                                        <ComboBoxItem Name="stepTypeBoth" Content="Create and update" IsSelected="True"/>
+                                        <ComboBoxItem Name="stepTypeCreate" Content="Create only"/>
+                                        <ComboBoxItem Name="stepTypeUpdate" Content="Update only"/>
+                                    </ComboBox>
                                 </StackPanel>
                                 <TextBox x:Name="stepFetchTextBox" Grid.Row="1"
                                     Height="200" Width="420" Margin="5,5,-67,0"

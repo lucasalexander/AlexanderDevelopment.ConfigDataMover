@@ -125,7 +125,13 @@ namespace AlexanderDevelopment.ConfigDataMover.Cli
                     JobStep step = new JobStep();
                     step.StepName = xn.SelectSingleNode("Name").InnerText;
                     step.StepFetch = xn.SelectSingleNode("Fetch").InnerText;
-                    step.UpdateOnly = Convert.ToBoolean(xn.Attributes["updateOnly"].Value);
+                    step.UpdateOnly = false;
+                    if(xn.Attributes["updateOnly"]!=null)
+                        step.UpdateOnly = Convert.ToBoolean(xn.Attributes["updateOnly"].Value);
+
+                    step.CreateOnly = false;
+                    if (xn.Attributes["createOnly"] != null)
+                        step.CreateOnly = Convert.ToBoolean(xn.Attributes["createOnly"].Value);
 
                     _jobSteps.Add(step);
                 }

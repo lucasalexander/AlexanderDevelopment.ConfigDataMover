@@ -85,7 +85,14 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                         JobStep step = new JobStep();
                         step.StepName = xn.SelectSingleNode("Name").InnerText;
                         step.StepFetch = xn.SelectSingleNode("Fetch").InnerText;
-                        step.UpdateOnly = Convert.ToBoolean(xn.Attributes["updateOnly"].Value);
+
+                        step.UpdateOnly = false;
+                        if (xn.Attributes["updateOnly"] != null)
+                            step.UpdateOnly = Convert.ToBoolean(xn.Attributes["updateOnly"].Value);
+
+                        step.CreateOnly = false;
+                        if (xn.Attributes["createOnly"] != null)
+                            step.CreateOnly = Convert.ToBoolean(xn.Attributes["createOnly"].Value);
 
                         stepListBox.Items.Add(step);
                     }
@@ -160,7 +167,28 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                     JobStep step = (JobStep)item;
                     XmlElement elStep = doc.CreateElement("Step");
                     elStep.AppendChild(doc.CreateElement("Name")).InnerText = step.StepName;
-                    elStep.SetAttribute("updateOnly", (updateOnlyCheckBox.IsChecked.HasValue ? updateOnlyCheckBox.IsChecked.Value : false).ToString());
+                    switch ((string)stepTypeComboBox.SelectedValue)
+                    {
+                        case "Create only":
+                            elStep.SetAttribute("updateOnly", false.ToString());
+                            elStep.SetAttribute("createOnly", true.ToString());
+                            //step.UpdateOnly = false;
+                            //step.CreateOnly = true;
+                            break;
+                        case "Update only":
+                            elStep.SetAttribute("updateOnly", true.ToString());
+                            elStep.SetAttribute("createOnly", false.ToString());
+                            //step.UpdateOnly = true;
+                            //step.CreateOnly = false;
+                            break;
+                        default:
+                            elStep.SetAttribute("updateOnly", false.ToString());
+                            elStep.SetAttribute("createOnly", false.ToString());
+                            //step.UpdateOnly = false;
+                            //step.CreateOnly = false;
+                            break;
+                    }
+                    
                     elStep.AppendChild(doc.CreateElement("Fetch")).InnerText = step.StepFetch;
                     elSteps.AppendChild(elStep);
                 }
@@ -400,13 +428,23 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                 JobStep step = (JobStep)stepListBox.SelectedItem;
                 stepNameTextBox.Text = step.StepName;
                 stepFetchTextBox.Text = step.StepFetch;
-                updateOnlyCheckBox.IsChecked = step.UpdateOnly;
+                stepTypeComboBox.SelectedValue = "Create and update";
+                if (step.UpdateOnly)
+                {
+                    stepTypeComboBox.SelectedValue = "Update only";
+                }
+                if (step.CreateOnly)
+                {
+                    stepTypeComboBox.SelectedValue = "Create only";
+                }
+                //updateOnlyCheckBox.IsChecked = step.UpdateOnly;
             }
             else
             {
                 stepNameTextBox.Text = string.Empty;
                 stepFetchTextBox.Text = string.Empty;
-                updateOnlyCheckBox.IsChecked = false;
+                stepTypeComboBox.SelectedIndex = 0;
+                //updateOnlyCheckBox.IsChecked = false;
             }
         }
 
@@ -473,7 +511,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                 stepListBox.Items.Clear();
                 stepNameTextBox.Text = string.Empty;
                 stepFetchTextBox.Text = string.Empty;
-                updateOnlyCheckBox.IsChecked = false;
+                stepTypeComboBox.SelectedIndex = 0;
             }
         }
 
@@ -508,7 +546,20 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                     JobStep step = (JobStep)stepListBox.SelectedItem;
                     step.StepName = stepNameTextBox.Text;
                     step.StepFetch = stepFetchTextBox.Text;
-                    step.UpdateOnly = updateOnlyCheckBox.IsChecked.HasValue ? updateOnlyCheckBox.IsChecked.Value : false;
+                    switch ((string)stepTypeComboBox.SelectedValue) {
+                        case "Create only":
+                            step.UpdateOnly = false;
+                            step.CreateOnly = true;
+                            break;
+                        case "Update only":
+                            step.UpdateOnly = true;
+                            step.CreateOnly = false;
+                            break;
+                        default:
+                            step.UpdateOnly = false;
+                            step.CreateOnly = false;
+                            break;
+                    }
                     stepListBox.Items[stepListBox.SelectedIndex] = stepListBox.SelectedItem;
                     stepListBox.Items.Refresh();
                     stepListBox.SelectedIndex = selectedindex;

@@ -103,10 +103,9 @@
   <ItemGroup>
     <None Include="AlexanderDevelopment.ConfigDataMover.Lib.licenseheader" />
     <None Include="app.config" />
-    <None Include="fetch.xsd">
+    <EmbeddedResource Include="fetch.xsd">
       <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </EmbeddedResource>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

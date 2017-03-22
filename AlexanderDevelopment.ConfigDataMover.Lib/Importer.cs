@@ -495,9 +495,17 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
 
             //load CRM fetchxml schema to use for validation later- https://msdn.microsoft.com/en-us/library/gg309405.aspx
             XmlSchemaSet schemaSet = new XmlSchemaSet();
+            System.Reflection.Assembly execAssembly = System.Reflection.Assembly.GetExecutingAssembly();
             try
             {
-                schemaSet.Add(null, "fetch.xsd");
+                //schemaSet.Add(null, "fetch.xsd");
+                using (Stream schemaStream = execAssembly.GetManifestResourceStream("AlexanderDevelopment.ConfigDataMover.Lib.fetch.xsd"))
+                {
+                    using (XmlReader schemaReader = XmlReader.Create(schemaStream))
+                    {
+                        schemaSet.Add(null, schemaReader);
+                    }
+                }
             }
             catch(Exception ex)
             {
@@ -743,7 +751,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                         entity.Attributes.Remove("statuscode");
 
                                     importoperation = operationTypes.Create;
-                                    LogMessage("INFO", "    trying target create");
+                                    LogMessage("INFO", "    trying target create only");
                                     targetService.Create(entity);
                                     LogMessage("INFO", "    create ok");
 

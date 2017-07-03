@@ -1,0 +1,11 @@
+<ConfigDataJob><JobConfig mapBuGuid="True" mapCurrencyGuid="True" /><JobSteps><Step updateOnly="False"><Name>dog-team</Name><Fetch>&lt;fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false"&gt;
+  &lt;entity name="new_dog"&gt;
+    &lt;attribute name="new_dogid" /&gt;
+    &lt;attribute name="new_name" /&gt;
+    &lt;attribute name="ownerid" /&gt;
+    &lt;order attribute="new_name" descending="false" /&gt;
+    &lt;filter type="and"&gt;
+      &lt;condition attribute="ownerid" operator="eq" uiname="LucasTest01" uitype="team" value="{103CE4F8-713F-E511-940F-08002751DFCB}" /&gt;
+    &lt;/filter&gt;
+  &lt;/entity&gt;
+&lt;/fetch&gt;</Fetch></Step></JobSteps><GuidMappings /><ConnectionDetails source="file=C:\git-repos\AlexanderDevelopment.ConfigDataMover\samplefiles\New folder\export.json" target="url=http://192.168.65.101/LucasTest02;username=administrator;domain=companyx;password=P@55w0rd;" save="True" /></ConfigDataJob>

@@ -1,0 +1,15 @@
+<ConfigDataJob><JobConfig mapBuGuid="True" mapCurrencyGuid="True" /><JobSteps><Step updateOnly="False"><Name>Teams</Name><Fetch>&lt;fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false"&gt;
+  &lt;entity name="team"&gt;
+    &lt;attribute name="name" /&gt;
+    &lt;attribute name="administratorid" /&gt;
+    &lt;attribute name="businessunitid" /&gt;
+    &lt;attribute name="teamid" /&gt;
+    &lt;attribute name="teamtype" /&gt;
+    &lt;attribute name="queueid" /&gt;
+    &lt;order attribute="name" descending="false" /&gt;
+    &lt;filter type="and"&gt;
+      &lt;condition attribute="teamtype" operator="eq" value="0" /&gt;
+      &lt;condition attribute="isdefault" operator="eq" value="0" /&gt;
+    &lt;/filter&gt;
+  &lt;/entity&gt;
+&lt;/fetch&gt;</Fetch></Step></JobSteps><GuidMappings /><ConnectionDetails source="url=http://192.168.65.101/LucasTest01;username=administrator;domain=companyx;password=P@55w0rd;" target="url=https://lucasalexander.crm.dynamics.com;username=lucasalexander@lucasalexander.onmicrosoft.com;password=Rodin123;" save="True" /></ConfigDataJob>

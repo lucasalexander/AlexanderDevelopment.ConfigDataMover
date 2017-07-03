@@ -1,0 +1,9 @@
+<ConfigDataJob><JobConfig mapBuGuid="True" mapCurrencyGuid="True" /><JobSteps><Step updateOnly="False"><Name>teamtemplate</Name><Fetch>&lt;fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false"&gt;
+  &lt;entity name="teamtemplate"&gt;
+    &lt;attribute name="defaultaccessrightsmask" /&gt;
+    &lt;attribute name="description" /&gt;
+    &lt;attribute name="objecttypecode" /&gt;
+    &lt;attribute name="teamtemplateid" /&gt;
+    &lt;attribute name="teamtemplatename" /&gt;
+  &lt;/entity&gt;
+&lt;/fetch&gt;</Fetch></Step></JobSteps><GuidMappings /><ConnectionDetails source="Url=http://192.168.65.101/lucastest01; Domain=companyx; Username=administrator; Password=Tribridge#01;" target="Url=http://192.168.65.101/lucastest02; Domain=companyx; Username=administrator; Password=Tribridge#01;" save="True" /></ConfigDataJob>

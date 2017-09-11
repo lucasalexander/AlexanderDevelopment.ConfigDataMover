@@ -49,7 +49,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
             StringBuilder licenseSb = new StringBuilder();
             licenseSb.AppendLine("Dynamics CRM Configuration Data Mover\n");
             licenseSb.AppendLine("Version " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version + "\n");
-            licenseSb.AppendLine("Copyright " + DateTime.Now.Year.ToString() + " Lucas Alexander\n");
+            licenseSb.AppendLine("Copyright 2015-" + DateTime.Now.Year.ToString() + " Lucas Alexander\n");
             licenseSb.AppendLine(apacheText.Replace("'", "\""));
             string aboutText = licenseSb.ToString();
             aboutTextBlock.Text = aboutText;

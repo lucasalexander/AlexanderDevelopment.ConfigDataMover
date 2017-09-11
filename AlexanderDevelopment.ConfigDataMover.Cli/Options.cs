@@ -23,18 +23,19 @@ using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
+using System.Reflection;
 
 namespace AlexanderDevelopment.ConfigDataMover.Cli
 {
     class Options
     {
-        [Option('c', "configfile", Required = true, HelpText = "XML file containing job data")]
+        [Option('c', "configfile", Required = true, HelpText = "Absolute or relative patch to XML file containing job data")]
         public string ConfigFile { get; set; }
 
-        [Option('s', "source", Required = false, HelpText = "Data source, either a simplified CRM connection string to CRM source org OR full path to source data file in the form of 'FILE=C:\\datadirectory\\datafile.json'- optional if connection details are specified in config file.")]
+        [Option('s', "source", Required = false, HelpText = "Data source, either a simplified CRM connection string to CRM source org -OR- path (absolute or relative to working directory) to source data file in the form of 'FILE=C:\\datadirectory\\datafile.json' -OR- raw JSON from export file in the form of 'RAWJSON={YOUR_EXPORT_JSON_HERE}' - optional if connection details are specified in config file.")]
         public string Source { get; set; }
 
-        [Option('t', "target", Required = false, HelpText = "Data target, either a simplified CRM connection string to CRM target org OR full path to target data file in the form of 'FILE=C:\\datadirectory\\datafile.json'- optional if connection details are specified in config file.")]
+        [Option('t', "target", Required = false, HelpText = "Data target, either a simplified CRM connection string to CRM target org -OR- path (absolute or relative to working directory) to target data file in the form of 'FILE=C:\\datadirectory\\datafile.json' - optional if connection details are specified in config file.")]
         public string Target { get; set; }
 
         [Option('v', "verbose", HelpText = "Print details during execution")]
@@ -45,15 +46,15 @@ namespace AlexanderDevelopment.ConfigDataMover.Cli
         {
             var help = new HelpText
             {
-                Heading = new HeadingInfo("AlexanderDevelopment.ConfigDataMover.Cli", "1.10.0.1"),
+                Heading = new HeadingInfo("AlexanderDevelopment.ConfigDataMover.Cli", Assembly.GetExecutingAssembly().GetName().Version.ToString()),
                 AdditionalNewLineAfterOption = true,
                 AddDashesToOption = true
             };
-            help.Copyright = @"
-Copyright 2015-2017 Lucas Alexander
+            help.Copyright = string.Format(@"
+Copyright 2015-{0} Lucas Alexander
 
 This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it and/or modify it under the terms of the Apache License, Version 2.0. You may obtain a copy at http://www.apache.org/licenses/LICENSE-2.0.
-";
+", DateTime.Now.Year);
 
             help.AddPreOptionsLine("Usage: AlexanderDevelopment.ConfigDataMover.Cli.exe -c configfile.xml -s \"Url=https://xxxx; Domain=xxxx; Username=xxxx; Password=xxxx;\" -t \"Url=https://xxxx; Domain=xxxx; Username=xxxx; Password=xxxx;\"");
             help.AddOptions(this);

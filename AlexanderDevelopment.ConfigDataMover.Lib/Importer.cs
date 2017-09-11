@@ -126,7 +126,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             LogMessage("INFO", "parsing source connection");
             if (SourceString.ToUpper().StartsWith("FILE="))
             {
-                _sourceFile = Regex.Replace(SourceString, "FILE=", "", RegexOptions.IgnoreCase);
+                string sourcepath = Regex.Replace(SourceString, "FILE=", "", RegexOptions.IgnoreCase);
+                _sourceFile = Path.GetFullPath(sourcepath);
                 _isFileSource = true;
                 LogMessage("INFO", "source is file - " + _sourceFile);
 
@@ -178,7 +179,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             LogMessage("INFO", "parsing target connection");
             if (TargetString.ToUpper().StartsWith("FILE="))
             {
-                _targetFile = Regex.Replace(TargetString, "FILE=", "", RegexOptions.IgnoreCase);
+                string targetpath = Regex.Replace(TargetString, "FILE=", "", RegexOptions.IgnoreCase);
+                _targetFile = Path.GetFullPath(targetpath);
                 _savedSourceData = new ExportedData();
                 _isFileTarget = true;
                 LogMessage("INFO", "target is file - " + _targetFile);

@@ -105,6 +105,7 @@
     <None Include="app.config" />
     <EmbeddedResource Include="fetch.xsd">
       <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <None Include="packages.config" />
   </ItemGroup>

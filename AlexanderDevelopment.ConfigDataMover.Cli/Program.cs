@@ -50,9 +50,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Cli
                     Console.WriteLine("Source connection string: {0}", options.Source);
                     Console.WriteLine("Target connection string: {0}", options.Target);
                 }
-
                 //parse the config file
-                ParseConfig(options.ConfigFile);
+                ParseConfig(Path.GetFullPath(options.ConfigFile));
 
                 //set source/target connection from parameters if specified - this will overwrite connections from the config file
                 if (!string.IsNullOrEmpty(options.Source))

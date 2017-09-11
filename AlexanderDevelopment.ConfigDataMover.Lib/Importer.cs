@@ -123,60 +123,86 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
         /// </summary>
         private void ParseConnections()
         {
+            //source can be rawjson to parse, file to read/parse or crm connection string
             LogMessage("INFO", "parsing source connection");
-            if (SourceString.ToUpper().StartsWith("FILE="))
+
+            //check for rawjson source
+            if (SourceString.ToUpper().StartsWith("RAWJSON="))
             {
-                string sourcepath = Regex.Replace(SourceString, "FILE=", "", RegexOptions.IgnoreCase);
-                _sourceFile = Path.GetFullPath(sourcepath);
                 _isFileSource = true;
-                LogMessage("INFO", "source is file - " + _sourceFile);
+                LogMessage("INFO", "source is raw json");
+                LogMessage("INFO", "  deserializing source data from raw json");
+                // remove the "rawjson=" from the beginning
+                String lines = SourceString.Remove(0, "RAWJSON=".Length);
 
                 //deserialze source data
-                using (StreamReader sr = new StreamReader(_sourceFile))
-                {
-                    LogMessage("INFO", "  deserializing source data from file");
-                    // Read the stream to a string, and write the string to the console.
-                    String lines = sr.ReadToEnd();
-                    JsonSerializerSettings settings = new JsonSerializerSettings();
-                    settings.TypeNameHandling = TypeNameHandling.None;
-                    _savedSourceData = (ExportedData)JsonConvert.DeserializeObject<ExportedData>(lines, settings);
-                    LogMessage("INFO", "  source data deserialization complete");
+                JsonSerializerSettings settings = new JsonSerializerSettings();
+                settings.TypeNameHandling = TypeNameHandling.None;
+                _savedSourceData = (ExportedData)JsonConvert.DeserializeObject<ExportedData>(lines, settings);
+                LogMessage("INFO", "  source data deserialization complete");
 
-                }
             }
             else
             {
-                _sourceClient = new CrmServiceClient(SourceString);
-                
-                //validate login works
-                try
+                //check for file source
+                if (SourceString.ToUpper().StartsWith("FILE="))
                 {
-                    using (OrganizationServiceProxy service = _sourceClient.OrganizationServiceProxy)
+                    string sourcepath = Regex.Replace(SourceString, "FILE=", "", RegexOptions.IgnoreCase);
+                    _sourceFile = Path.GetFullPath(sourcepath);
+                    _isFileSource = true;
+                    LogMessage("INFO", "source is file - " + _sourceFile);
+
+                    //deserialze source data
+                    using (StreamReader sr = new StreamReader(_sourceFile))
                     {
-                        string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                        LogMessage("INFO", "  deserializing source data from file");
+                        // Read the stream to a string, and write the string to the console.
+                        String lines = sr.ReadToEnd();
+                        JsonSerializerSettings settings = new JsonSerializerSettings();
+                        settings.TypeNameHandling = TypeNameHandling.None;
+                        _savedSourceData = (ExportedData)JsonConvert.DeserializeObject<ExportedData>(lines, settings);
+                        LogMessage("INFO", "  source data deserialization complete");
+
+                    }
+                }
+                //if not rawjson or file target, it must (should?) be a crm connection string
+                else
+                {
+                    _sourceClient = new CrmServiceClient(SourceString);
+
+                    //validate login works
+                    try
+                    {
+                        using (OrganizationServiceProxy service = _sourceClient.OrganizationServiceProxy)
+                        {
+                            string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                           <entity name='businessunit'>
                             <attribute name='name' />
                             <attribute name='businessunitid' />
                           </entity>
                         </fetch>";
-                        EntityCollection buEntities = service.RetrieveMultiple(new FetchExpression(testFetch));
-                        if (buEntities.Entities.Count < 1)
-                        {
-                            throw new Exception("Test query returned zero results.");
+                            EntityCollection buEntities = service.RetrieveMultiple(new FetchExpression(testFetch));
+                            if (buEntities.Entities.Count < 1)
+                            {
+                                throw new Exception("Test query returned zero results.");
+                            }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    string errormsg = string.Format(string.Format("Could not validate source connection: {0}", ex.Message));
-                    LogMessage("ERROR", errormsg);
-                    throw new InvalidOperationException(errormsg);
-                }
+                    catch (Exception ex)
+                    {
+                        string errormsg = string.Format(string.Format("Could not validate source connection: {0}", ex.Message));
+                        LogMessage("ERROR", errormsg);
+                        throw new InvalidOperationException(errormsg);
+                    }
 
-                _isFileSource = false;
+                    _isFileSource = false;
+                }
             }
 
+            //target can be file to write or crm connection string
             LogMessage("INFO", "parsing target connection");
+
+            //check for file target
             if (TargetString.ToUpper().StartsWith("FILE="))
             {
                 string targetpath = Regex.Replace(TargetString, "FILE=", "", RegexOptions.IgnoreCase);
@@ -185,6 +211,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                 _isFileTarget = true;
                 LogMessage("INFO", "target is file - " + _targetFile);
             }
+            //not file target, so it must (should?) be crm connection string
             else
             {
                 _targetClient = new CrmServiceClient(TargetString);

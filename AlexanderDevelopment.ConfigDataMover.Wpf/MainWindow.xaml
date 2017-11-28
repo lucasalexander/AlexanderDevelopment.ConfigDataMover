@@ -95,6 +95,7 @@
                                         <ComboBoxItem Name="stepTypeBoth" Content="Create and update" IsSelected="True"/>
                                         <ComboBoxItem Name="stepTypeCreate" Content="Create only"/>
                                         <ComboBoxItem Name="stepTypeUpdate" Content="Update only"/>
+                                        <ComboBoxItem Name="stepTypeManyMany" Content="Many to many"/>
                                     </ComboBox>
                                 </StackPanel>
                                 <TextBox x:Name="stepFetchTextBox" Grid.Row="1"

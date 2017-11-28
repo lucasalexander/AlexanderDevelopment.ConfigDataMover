@@ -132,6 +132,10 @@ namespace AlexanderDevelopment.ConfigDataMover.Cli
                     if (xn.Attributes["createOnly"] != null)
                         step.CreateOnly = Convert.ToBoolean(xn.Attributes["createOnly"].Value);
 
+                    step.ManyMany = false;
+                    if (xn.Attributes["manyMany"] != null)
+                        step.ManyMany = Convert.ToBoolean(xn.Attributes["manyMany"].Value);
+
                     _jobSteps.Add(step);
                 }
 

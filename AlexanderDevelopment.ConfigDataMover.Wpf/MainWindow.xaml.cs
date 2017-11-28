@@ -94,6 +94,10 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                         if (xn.Attributes["createOnly"] != null)
                             step.CreateOnly = Convert.ToBoolean(xn.Attributes["createOnly"].Value);
 
+                        step.ManyMany = false;
+                        if (xn.Attributes["manyMany"] != null)
+                            step.ManyMany = Convert.ToBoolean(xn.Attributes["manyMany"].Value);
+
                         stepListBox.Items.Add(step);
                     }
 
@@ -167,28 +171,31 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                     JobStep step = (JobStep)item;
                     XmlElement elStep = doc.CreateElement("Step");
                     elStep.AppendChild(doc.CreateElement("Name")).InnerText = step.StepName;
-                    switch ((string)stepTypeComboBox.SelectedValue)
+
+                    //default createonly, updateonly and manymany attributes to false
+                    elStep.SetAttribute("updateOnly", false.ToString());
+                    elStep.SetAttribute("createOnly", false.ToString());
+                    elStep.SetAttribute("manyMany", false.ToString());
+
+                    //check whether to set any createonly, updateonly and manymany attributes to true
+                    if (step.CreateOnly)
                     {
-                        case "Create only":
-                            elStep.SetAttribute("updateOnly", false.ToString());
-                            elStep.SetAttribute("createOnly", true.ToString());
-                            //step.UpdateOnly = false;
-                            //step.CreateOnly = true;
-                            break;
-                        case "Update only":
-                            elStep.SetAttribute("updateOnly", true.ToString());
-                            elStep.SetAttribute("createOnly", false.ToString());
-                            //step.UpdateOnly = true;
-                            //step.CreateOnly = false;
-                            break;
-                        default:
-                            elStep.SetAttribute("updateOnly", false.ToString());
-                            elStep.SetAttribute("createOnly", false.ToString());
-                            //step.UpdateOnly = false;
-                            //step.CreateOnly = false;
-                            break;
+                        elStep.SetAttribute("updateOnly", false.ToString());
+                        elStep.SetAttribute("createOnly", true.ToString());
+                        elStep.SetAttribute("manyMany", false.ToString());
                     }
-                    
+                    if (step.UpdateOnly)
+                    {
+                        elStep.SetAttribute("updateOnly", true.ToString());
+                        elStep.SetAttribute("createOnly", false.ToString());
+                        elStep.SetAttribute("manyMany", false.ToString());
+                    }
+                    if (step.ManyMany)
+                    {
+                        elStep.SetAttribute("updateOnly", false.ToString());
+                        elStep.SetAttribute("createOnly", false.ToString());
+                        elStep.SetAttribute("manyMany", true.ToString());
+                    }
                     elStep.AppendChild(doc.CreateElement("Fetch")).InnerText = step.StepFetch;
                     elSteps.AppendChild(elStep);
                 }
@@ -437,6 +444,10 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                 {
                     stepTypeComboBox.SelectedValue = "Create only";
                 }
+                if(step.ManyMany)
+                {
+                    stepTypeComboBox.SelectedValue = "Many to many";
+                }
                 //updateOnlyCheckBox.IsChecked = step.UpdateOnly;
             }
             else
@@ -550,14 +561,22 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                         case "Create only":
                             step.UpdateOnly = false;
                             step.CreateOnly = true;
+                            step.ManyMany = false;
                             break;
                         case "Update only":
                             step.UpdateOnly = true;
                             step.CreateOnly = false;
+                            step.ManyMany = false;
+                            break;
+                        case "Many to many":
+                            step.UpdateOnly = false;
+                            step.CreateOnly = false;
+                            step.ManyMany = true;
                             break;
                         default:
                             step.UpdateOnly = false;
                             step.CreateOnly = false;
+                            step.ManyMany = false;
                             break;
                     }
                     stepListBox.Items[stepListBox.SelectedIndex] = stepListBox.SelectedItem;

@@ -30,5 +30,6 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
         public string StepFetch { get; set; }
         public bool UpdateOnly { get; set; }
         public bool CreateOnly { get; set; }
+        public bool ManyMany { get; set; }
     }
 }

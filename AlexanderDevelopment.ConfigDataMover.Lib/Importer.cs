@@ -880,7 +880,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                                     entity.Attributes.Remove("statuscode");
 
                                                 //only try the create step if the update failed because the record doesn't already exist to update
-                                                if (ex.Message.ToUpper().EndsWith("DOES NOT EXIST"))
+                                                if (ex.Message.ToUpper().EndsWith("DOES NOT EXIST")||ex.Message.ToUpper().Contains("NO OBJECT MATCHED THE QUERY"))
                                                 {
                                                     importoperation = operationTypes.Create;
                                                     LogMessage("INFO", "    trying target create");

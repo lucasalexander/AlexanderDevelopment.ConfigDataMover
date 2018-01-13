@@ -1,7 +1,7 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // AssemblyInfo.cs
 //
-// Copyright 2015-2017 Lucas Alexander
+// Copyright 2015-2018 Lucas Alexander
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("AlexanderDevelopment.ConfigDataMover.Wpf")]
-[assembly: AssemblyCopyright("Copyright © Lucas Alexander 2015-2017")]
+[assembly: AssemblyCopyright("Copyright © Lucas Alexander 2015-2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -68,4 +68,4 @@ using System.Windows;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2.3.*")]
+[assembly: AssemblyVersion("2.4.*")]

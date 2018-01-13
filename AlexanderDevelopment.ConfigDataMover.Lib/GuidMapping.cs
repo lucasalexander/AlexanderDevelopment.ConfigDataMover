@@ -1,7 +1,7 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // GuidMapping.cs
 //
-// Copyright 2015-2017 Lucas Alexander
+// Copyright 2015-2018 Lucas Alexander
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

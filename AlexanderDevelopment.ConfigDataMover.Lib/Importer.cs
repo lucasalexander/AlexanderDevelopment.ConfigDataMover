@@ -1128,6 +1128,17 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                 jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
                                 attributeValue = new OptionSetValue { Value = (int)jObject["Value"] };
                                 break;
+                            //if it's a multiselectoptionset
+                            case "Microsoft.Xrm.Sdk.OptionSetValueCollection":
+                                jArray = (Newtonsoft.Json.Linq.JArray)exportAttribute.AttributeValue;
+
+                                OptionSetValueCollection multiOption = new OptionSetValueCollection { };
+                                foreach (var child in jArray.Children())
+                                {
+                                    multiOption.Add(new OptionSetValue { Value = (int)child["Value"] });
+                                }
+                                attributeValue = multiOption;
+                                break;
                             //if it's money
                             case "Microsoft.Xrm.Sdk.Money":
                                 jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;

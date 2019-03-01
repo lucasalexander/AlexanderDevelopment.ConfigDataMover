@@ -23,8 +23,6 @@ using System.Threading.Tasks;
 using System.ServiceModel;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
-using Microsoft.Xrm.Sdk.Messages;
-using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Tooling.Connector;
 using Microsoft.Crm.Sdk.Messages;
@@ -718,7 +716,6 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         operationTypes importoperation = new operationTypes();
 
                         //loop through each entity in the collection
-                        Dictionary<string, string> ManyManyRelationshipNamesDict = new Dictionary<string, string>();
                         foreach (Entity entity in ec)
                         {
                             //set a flag for whether we should execute specialized operations post-create/update
@@ -803,48 +800,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                         related.Add(new EntityReference { Id = (Guid)attributes[1].Value, LogicalName = entity2logicalname });
 
                                         //the relationship name is the name of the entity we're querying
-                                        //Relationship relationship = new Relationship(entity.LogicalName);
-
-                                        //the relationship name may be different from the name of the intersect entity we're querying
-                                        string NNRelationshipName = null;
-                                        if (ManyManyRelationshipNamesDict.ContainsKey(entity.LogicalName))
-                                        {
-                                            NNRelationshipName = ManyManyRelationshipNamesDict[entity.LogicalName];
-                                        }
-                                        else
-                                        {
-                                            try
-                                            {
-                                                RetrieveEntityRequest entityReq = new RetrieveEntityRequest()
-                                                {
-                                                    LogicalName = entity.LogicalName,
-                                                    EntityFilters = EntityFilters.Relationships
-                                                };
-                                                LogMessage("INFO", "    trying RetrieveEntityRequest");
-                                                RetrieveEntityResponse entityRes = (RetrieveEntityResponse)targetService.Execute(entityReq);
-                                                LogMessage("INFO", "    got RetrieveEntityResponse");
-
-                                                ManyToManyRelationshipMetadata[] rels = entityRes.EntityMetadata.ManyToManyRelationships;
-                                                foreach (ManyToManyRelationshipMetadata r in rels)
-                                                {
-                                                    if (r.IntersectEntityName == entity.LogicalName)
-                                                    {
-                                                        NNRelationshipName = r.SchemaName;
-                                                        ManyManyRelationshipNamesDict.Add(entity.LogicalName, NNRelationshipName);
-                                                        LogMessage("INFO", "    N:N found relationship schema name: " + NNRelationshipName);
-                                                    }
-                                                }
-                                            }
-                                            catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
-                                            {
-                                                //rethrow the exception so it gets handled in the end catch block
-                                                throw ex;
-                                            }
-                                        }
-
-                                        NNRelationshipName = string.IsNullOrEmpty(NNRelationshipName) ? entity.LogicalName : NNRelationshipName;
-                                        Relationship relationship = new Relationship(NNRelationshipName);
-
+                                        Relationship relationship = new Relationship(entity.LogicalName);
+                                        
                                         try
                                         {
                                             //try the associate

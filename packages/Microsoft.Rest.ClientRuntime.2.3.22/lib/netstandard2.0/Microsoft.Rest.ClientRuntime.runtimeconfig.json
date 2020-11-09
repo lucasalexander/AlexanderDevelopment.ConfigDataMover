@@ -1,0 +1,5 @@
+{
+  "runtimeOptions": {
+    "tfm": "netstandard2.0"
+  }
+}

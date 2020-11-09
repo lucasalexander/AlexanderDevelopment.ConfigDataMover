@@ -54,6 +54,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
 
         private static CrmServiceClient _sourceClient;
         private static CrmServiceClient _targetClient;
+        private static IOrganizationService _sourceService;
+        private static IOrganizationService _targetService;
         private static string _sourceFile;
         private static string _targetFile;
         private static bool _isFileSource;
@@ -170,26 +172,27 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                 //if not rawjson or file target, it must (should?) be a crm connection string
                 else
                 {
+
                     _sourceClient = new CrmServiceClient(SourceString);
+                    _sourceService = (IOrganizationService)_sourceClient.OrganizationWebProxyClient != null ? (IOrganizationService)_sourceClient.OrganizationWebProxyClient : (IOrganizationService)_sourceClient.OrganizationServiceProxy;
 
                     //validate login works
                     try
                     {
-                        using (OrganizationServiceProxy service = _sourceClient.OrganizationServiceProxy)
-                        {
-                            string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+
+                        string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                           <entity name='businessunit'>
                             <attribute name='name' />
                             <attribute name='businessunitid' />
                           </entity>
                         </fetch>";
-                            EntityCollection buEntities = service.RetrieveMultiple(new FetchExpression(testFetch));
-                            if (buEntities.Entities.Count < 1)
-                            {
-                                throw new Exception("Test query returned zero results.");
-                            }
+                        EntityCollection buEntities = _sourceService.RetrieveMultiple(new FetchExpression(testFetch));
+                        if (buEntities.Entities.Count < 1)
+                        {
+                            throw new Exception("Test query returned zero results.");
                         }
                     }
+
                     catch (Exception ex)
                     {
                         string errormsg = string.Format(string.Format("Could not validate source connection: {0}", ex.Message));
@@ -217,29 +220,27 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             else
             {
                 _targetClient = new CrmServiceClient(TargetString);
+                _targetService = (IOrganizationService)_targetClient.OrganizationWebProxyClient != null ? (IOrganizationService)_targetClient.OrganizationWebProxyClient : (IOrganizationService)_targetClient.OrganizationServiceProxy;
 
                 //validate login works
                 try
                 {
-                    using (OrganizationServiceProxy service = _targetClient.OrganizationServiceProxy)
-                    {
-                        string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                    string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                           <entity name='businessunit'>
                             <attribute name='name' />
                             <attribute name='businessunitid' />
                           </entity>
                         </fetch>";
-                        EntityCollection buEntities = service.RetrieveMultiple(new FetchExpression(testFetch));
-                        if (buEntities.Entities.Count < 1)
-                        {
-                            throw new Exception("Test query returned zero results.");
-                        }
-
-                        //get the organization id
-                        Guid orgId = ((WhoAmIResponse)service.Execute(new WhoAmIRequest())).OrganizationId;
-
-                        LogMessage("INFO", "target version is - " + _targetClient.ConnectedOrgVersion.ToString());
+                    EntityCollection buEntities = _targetService.RetrieveMultiple(new FetchExpression(testFetch));
+                    if (buEntities.Entities.Count < 1)
+                    {
+                        throw new Exception("Test query returned zero results.");
                     }
+
+                    //get the organization id
+                    Guid orgId = ((WhoAmIResponse)_targetService.Execute(new WhoAmIRequest())).OrganizationId;
+
+                    LogMessage("INFO", "target version is - " + _targetClient.ConnectedOrgVersion.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -617,8 +618,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
         /// </summary>
         public void Process()
         {
-            OrganizationServiceProxy sourceService = null;
-            OrganizationServiceProxy targetService = null;
+            //OrganizationServiceProxy sourceService = null;
+            //OrganizationServiceProxy _targetService = null;
 
             //set up logging
             logger = LogManager.GetLogger(typeof(Importer));
@@ -630,15 +631,15 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             //establish connections and/or read source data from file
             ParseConnections();
 
-            //connect to source and target if necessary
+            /*//connect to source and target if necessary
             if (!_isFileSource)
             {
                 sourceService = _sourceClient.OrganizationServiceProxy;
             }
             if (!_isFileTarget)
             {
-                targetService = _targetClient.OrganizationServiceProxy;
-            }
+                _targetService = _targetClient.OrganizationServiceProxy;
+            }*/
 
             //create the guid mappings table
             SetupGuidMappings();
@@ -685,7 +686,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         // Build fetchXml string with the placeholders.
                         string fetchXml = CreateXml(fetchQuery, pagingCookie, pageNumber, fetchCount);
 
-                        EntityCollection retrieved = sourceService.RetrieveMultiple(new FetchExpression(fetchXml));
+                        EntityCollection retrieved = _sourceService.RetrieveMultiple(new FetchExpression(fetchXml));
                         ec.AddRange(retrieved.Entities);
 
                         if (retrieved.MoreRecords)
@@ -822,7 +823,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                                     EntityFilters = EntityFilters.Relationships
                                                 };
                                                 LogMessage("INFO", "    trying RetrieveEntityRequest");
-                                                RetrieveEntityResponse entityRes = (RetrieveEntityResponse)targetService.Execute(entityReq);
+                                                RetrieveEntityResponse entityRes = (RetrieveEntityResponse)_targetService.Execute(entityReq);
                                                 LogMessage("INFO", "    got RetrieveEntityResponse");
 
                                                 ManyToManyRelationshipMetadata[] rels = entityRes.EntityMetadata.ManyToManyRelationships;
@@ -850,7 +851,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                         {
                                             //try the associate
                                             LogMessage("INFO", "    trying target n:n associate");
-                                            targetService.Associate(entity1logicalname, (Guid)attributes[0].Value, relationship, related);
+                                            _targetService.Associate(entity1logicalname, (Guid)attributes[0].Value, relationship, related);
                                             LogMessage("INFO", "    target n:n associate ok");
                                         }
                                         catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -886,7 +887,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
 
                                         importoperation = operationTypes.Create;
                                         LogMessage("INFO", "    trying target create only");
-                                        targetService.Create(entity);
+                                        _targetService.Create(entity);
                                         LogMessage("INFO", "    create ok");
 
                                     }
@@ -908,7 +909,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                             }
                                             importoperation = operationTypes.Update;
                                             LogMessage("INFO", "    trying target update");
-                                            targetService.Update(entity);
+                                            _targetService.Update(entity);
                                             LogMessage("INFO", "    update ok");
                                         }
                                         catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -929,7 +930,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                                     importoperation = operationTypes.Create;
                                                     LogMessage("INFO", "    trying target create");
                                                     //if update fails and step is not update-only then try to create
-                                                    targetService.Create(entity);
+                                                    _targetService.Create(entity);
                                                     LogMessage("INFO", "    create ok");
                                                 }
                                                 else //if the update failed for any reason other than "does not exist" we have a problem and don't want to try the create step
@@ -971,7 +972,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                                     try
                                                     {
                                                         LogMessage("INFO", "    trying target assignment update");
-                                                        targetService.Execute(assign);
+                                                        _targetService.Execute(assign);
                                                         LogMessage("INFO", "    assignment ok");
                                                     }
                                                     catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -998,7 +999,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                                 try
                                                 {
                                                     LogMessage("INFO", "    trying target statecode/statuscode update");
-                                                    targetService.Execute(setstate);
+                                                    _targetService.Execute(setstate);
                                                     LogMessage("INFO", "    set statecode/statuscode ok");
                                                 }
                                                 catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -1027,7 +1028,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                                     try
                                                     {
                                                         LogMessage("INFO", "    trying target statecode/statuscode update");
-                                                        targetService.Execute(setstate);
+                                                        _targetService.Execute(setstate);
                                                         LogMessage("INFO", "    set statecode/statuscode ok");
                                                     }
                                                     catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)

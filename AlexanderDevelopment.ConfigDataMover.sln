@@ -7,13 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlexanderDevelopment.Config
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlexanderDevelopment.ConfigDataMover.Lib", "AlexanderDevelopment.ConfigDataMover.Lib\AlexanderDevelopment.ConfigDataMover.Lib.csproj", "{9383563C-368B-4FE7-A62D-261AA9E5D296}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9ADB9D8E-0DA6-4B3B-8555-55F9EED39536}"
-	ProjectSection(SolutionItems) = preProject
-		BuildNoteTemplate.md = BuildNoteTemplate.md
-		UploadBuildNotes.ps1 = UploadBuildNotes.ps1
-		UploadReleaseNotes.ps1 = UploadReleaseNotes.ps1
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlexanderDevelopment.ConfigDataMover.Wpf", "AlexanderDevelopment.ConfigDataMover.Wpf\AlexanderDevelopment.ConfigDataMover.Wpf.csproj", "{102B8E33-CA1D-4066-BDCA-061BFA0BFC06}"
 EndProject
 Global

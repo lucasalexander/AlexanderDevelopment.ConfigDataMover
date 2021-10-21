@@ -5,12 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AlexanderDevelopment.ConfigDataMover.Wpf"
         mc:Ignorable="d"
-        Title="Fatal job error" Height="313.314" Width="300" ShowInTaskbar="False" ResizeMode="NoResize">
-    <StackPanel>
-        <Label x:Name="messageLabel">Error</Label>
-        <TextBlock x:Name="messageTextBox" Height="50" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"></TextBlock>
-        <Label x:Name="errorLabel">Error details</Label>
-        <TextBlock x:Name="errorTextBox" Height="150"  ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"></TextBlock>
+        Title="Fatal job error" Height="350" Width="630" ShowInTaskbar="False" ResizeMode="NoResize">
+    <StackPanel Margin="10,10,10,10">
+        <Label x:Name="messageLabel" FontSize="16">Error</Label>
+        <TextBlock x:Name="messageTextBox" Height="50" TextWrapping="Wrap" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"></TextBlock>
+        <Label x:Name="errorLabel" FontSize="16">Error details</Label>
+        <Border BorderThickness="1" BorderBrush="Black">
+            <ScrollViewer Height="150" Padding="5,5,5,5">
+                <TextBlock x:Name="errorTextBox" TextWrapping="Wrap" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"></TextBlock>
+            </ScrollViewer>
+        </Border>
         <Button Padding="2" HorizontalAlignment="Center" Margin="4" Click="Button_Click">Copy error text to clipboard</Button>
     </StackPanel>
 </Window>

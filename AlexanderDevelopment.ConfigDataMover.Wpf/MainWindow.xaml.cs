@@ -351,6 +351,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                 //MessageBox.Show(string.Format("An error prevented the job from executing: {0}", e.Error.Message), "Fatal job error", MessageBoxButton.OK, MessageBoxImage.Error);
                 JobError errorbox = new JobError();
                 errorbox.SetDetails(string.Format("An error prevented the job from executing: {0}", e.Error.Message), e.Error.ToString());
+                errorbox.Owner = this;
                 errorbox.ShowDialog();
             }
             else
@@ -700,25 +701,45 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
         private void aboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
             About about = new About();
+            about.Owner = this;
             about.ShowDialog();
         }
 
         private void checkversionMenuItem_Click(object sender, RoutedEventArgs e)
         {
             CheckLatestVersion checkversion = new CheckLatestVersion();
+            checkversion.Owner = this;
             checkversion.ShowDialog();
         }
 
         private void setsourceButton_Click(object sender, RoutedEventArgs e)
         {
             SetConnection setconnection = new SetConnection(_source, true);
+            setconnection.Owner = this;
             setconnection.ShowDialog();
         }
 
         private void settargetButton_Click(object sender, RoutedEventArgs e)
         {
             SetConnection setconnection = new SetConnection(_target, false);
+            setconnection.Owner = this;
             setconnection.ShowDialog();
+        }
+
+        private void swapSourceTargetButton_Click(object sender, RoutedEventArgs e)
+        {
+            var sourceBak = _source;
+            var targetBak = _target;
+
+            _source = targetBak;
+            _target = sourceBak;
+
+            //update main panel display
+            var sourceContent = sourceLabel.Content;
+            var targetContent = targetLabel.Content;
+
+            sourceLabel.Content = targetContent;
+            targetLabel.Content = sourceContent;
         }
     }
 

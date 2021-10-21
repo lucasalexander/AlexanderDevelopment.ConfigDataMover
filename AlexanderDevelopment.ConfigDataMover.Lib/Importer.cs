@@ -23,8 +23,6 @@ using System.Threading.Tasks;
 using System.ServiceModel;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
-using Microsoft.Xrm.Sdk.Messages;
-using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Tooling.Connector;
 using Microsoft.Crm.Sdk.Messages;
@@ -36,6 +34,7 @@ using System.Text;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using System.Xml.Schema;
+using Newtonsoft.Json.Serialization;
 
 namespace AlexanderDevelopment.ConfigDataMover.Lib
 {
@@ -54,8 +53,6 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
 
         private static CrmServiceClient _sourceClient;
         private static CrmServiceClient _targetClient;
-        private static IOrganizationService _sourceService;
-        private static IOrganizationService _targetService;
         private static string _sourceFile;
         private static string _targetFile;
         private static bool _isFileSource;
@@ -172,27 +169,25 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                 //if not rawjson or file target, it must (should?) be a crm connection string
                 else
                 {
-
                     _sourceClient = new CrmServiceClient(SourceString);
-                    _sourceService = (IOrganizationService)_sourceClient.OrganizationWebProxyClient != null ? (IOrganizationService)_sourceClient.OrganizationWebProxyClient : (IOrganizationService)_sourceClient.OrganizationServiceProxy;
 
                     //validate login works
                     try
                     {
-
-                        string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                        
+                            string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                           <entity name='businessunit'>
                             <attribute name='name' />
                             <attribute name='businessunitid' />
                           </entity>
                         </fetch>";
-                        EntityCollection buEntities = _sourceService.RetrieveMultiple(new FetchExpression(testFetch));
-                        if (buEntities.Entities.Count < 1)
-                        {
-                            throw new Exception("Test query returned zero results.");
-                        }
+                            EntityCollection buEntities = _sourceClient.RetrieveMultiple(new FetchExpression(testFetch));
+                            if (buEntities.Entities.Count < 1)
+                            {
+                                throw new Exception("Test query returned zero results.");
+                            }
+                        
                     }
-
                     catch (Exception ex)
                     {
                         string errormsg = string.Format(string.Format("Could not validate source connection: {0}", ex.Message));
@@ -220,27 +215,27 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             else
             {
                 _targetClient = new CrmServiceClient(TargetString);
-                _targetService = (IOrganizationService)_targetClient.OrganizationWebProxyClient != null ? (IOrganizationService)_targetClient.OrganizationWebProxyClient : (IOrganizationService)_targetClient.OrganizationServiceProxy;
 
                 //validate login works
                 try
                 {
-                    string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                    
+                        string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                           <entity name='businessunit'>
                             <attribute name='name' />
                             <attribute name='businessunitid' />
                           </entity>
                         </fetch>";
-                    EntityCollection buEntities = _targetService.RetrieveMultiple(new FetchExpression(testFetch));
-                    if (buEntities.Entities.Count < 1)
-                    {
-                        throw new Exception("Test query returned zero results.");
-                    }
+                        EntityCollection buEntities = _targetClient.RetrieveMultiple(new FetchExpression(testFetch));
+                        if (buEntities.Entities.Count < 1)
+                        {
+                            throw new Exception("Test query returned zero results.");
+                        }
 
-                    //get the organization id
-                    Guid orgId = ((WhoAmIResponse)_targetService.Execute(new WhoAmIRequest())).OrganizationId;
+                        //get the organization id
+                        Guid orgId = ((WhoAmIResponse)_targetClient.Execute(new WhoAmIRequest())).OrganizationId;
 
-                    LogMessage("INFO", "target version is - " + _targetClient.ConnectedOrgVersion.ToString());
+                        LogMessage("INFO", "target version is - " + _targetClient.ConnectedOrgVersion.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -283,8 +278,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             }
             else //otherwise we need to look them up in the source org
             {
-                using (OrganizationServiceProxy service = _sourceClient.OrganizationServiceProxy)
-                {
+                
                     if (MapBaseBu)
                     {
                         LogMessage("INFO", "querying source base business unit");
@@ -299,7 +293,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                             </filter>
                           </entity>
                         </fetch>";
-                            EntityCollection buEntities = service.RetrieveMultiple(new FetchExpression(baseBuFetchXml));
+                            EntityCollection buEntities = _sourceClient.RetrieveMultiple(new FetchExpression(baseBuFetchXml));
                             sourceBaseBu = (Guid)(buEntities[0]["businessunitid"]);
 
                             string baseTeamFetchXml = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
@@ -314,7 +308,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                             </filter>
                           </entity>
                         </fetch>";
-                            EntityCollection teamEntities = service.RetrieveMultiple(new FetchExpression(string.Format(baseTeamFetchXml, sourceBaseBu)));
+                            EntityCollection teamEntities = _sourceClient.RetrieveMultiple(new FetchExpression(string.Format(baseTeamFetchXml, sourceBaseBu)));
                             sourceBaseTeam = (Guid)(teamEntities[0]["teamid"]);
                         }
                         catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -323,7 +317,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                             LogMessage("ERROR", errormsg);
                             throw new InvalidOperationException(errormsg);
                         }
-                    }
+                    
 
                     if (MapBaseCurrency)
                     {
@@ -335,7 +329,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                             <attribute name='basecurrencyid' />
                           </entity>
                         </fetch>";
-                            EntityCollection currencyEntities = service.RetrieveMultiple(new FetchExpression(baseCurrencyFetchXml));
+                            EntityCollection currencyEntities = _sourceClient.RetrieveMultiple(new FetchExpression(baseCurrencyFetchXml));
                             sourceBaseCurrency = ((EntityReference)currencyEntities[0]["basecurrencyid"]).Id;
                         }
                         catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -351,8 +345,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
             //if we're not writing data to a target crm org instead of a file, we need to look up the target base BU and currency
             if (!_isFileTarget)
             {
-                using (OrganizationServiceProxy service = _targetClient.OrganizationServiceProxy)
-                {
+                
                     if (MapBaseBu)
                     {
                         LogMessage("INFO", "querying target base business unit");
@@ -367,7 +360,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                             </filter>
                           </entity>
                         </fetch>";
-                            EntityCollection buEntities = service.RetrieveMultiple(new FetchExpression(baseBuFetchXml));
+                            EntityCollection buEntities = _targetClient.RetrieveMultiple(new FetchExpression(baseBuFetchXml));
                             targetBaseBu = (Guid)(buEntities[0]["businessunitid"]);
 
                             string baseTeamFetchXml = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
@@ -382,7 +375,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                             </filter>
                           </entity>
                         </fetch>";
-                            EntityCollection teamEntities = service.RetrieveMultiple(new FetchExpression(string.Format(baseTeamFetchXml, targetBaseBu)));
+                            EntityCollection teamEntities = _targetClient.RetrieveMultiple(new FetchExpression(string.Format(baseTeamFetchXml, targetBaseBu)));
                             targetBaseTeam = (Guid)(teamEntities[0]["teamid"]);
                         }
                         catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -403,7 +396,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                             <attribute name='basecurrencyid' />
                           </entity>
                         </fetch>";
-                            EntityCollection currencyEntities = service.RetrieveMultiple(new FetchExpression(baseCurrencyFetchXml));
+                            EntityCollection currencyEntities = _targetClient.RetrieveMultiple(new FetchExpression(baseCurrencyFetchXml));
                             targetBaseCurrency = ((EntityReference)currencyEntities[0]["basecurrencyid"]).Id;
                         }
                         catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -413,8 +406,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                             throw new InvalidOperationException(errormsg);
                         }
                     }
-                }
-
+                
             }
 
             //add the source/target mappings to the guid mappings list
@@ -618,9 +610,6 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
         /// </summary>
         public void Process()
         {
-            //OrganizationServiceProxy sourceService = null;
-            //OrganizationServiceProxy _targetService = null;
-
             //set up logging
             logger = LogManager.GetLogger(typeof(Importer));
             LogMessage("INFO", "starting job");
@@ -630,16 +619,6 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
 
             //establish connections and/or read source data from file
             ParseConnections();
-
-            /*//connect to source and target if necessary
-            if (!_isFileSource)
-            {
-                sourceService = _sourceClient.OrganizationServiceProxy;
-            }
-            if (!_isFileTarget)
-            {
-                _targetService = _targetClient.OrganizationServiceProxy;
-            }*/
 
             //create the guid mappings table
             SetupGuidMappings();
@@ -686,7 +665,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         // Build fetchXml string with the placeholders.
                         string fetchXml = CreateXml(fetchQuery, pagingCookie, pageNumber, fetchCount);
 
-                        EntityCollection retrieved = _sourceService.RetrieveMultiple(new FetchExpression(fetchXml));
+                        EntityCollection retrieved = _sourceClient.RetrieveMultiple(new FetchExpression(fetchXml));
                         ec.AddRange(retrieved.Entities);
 
                         if (retrieved.MoreRecords)
@@ -719,7 +698,6 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         operationTypes importoperation = new operationTypes();
 
                         //loop through each entity in the collection
-                        Dictionary<string, string> ManyManyRelationshipNamesDict = new Dictionary<string, string>();
                         foreach (Entity entity in ec)
                         {
                             //set a flag for whether we should execute specialized operations post-create/update
@@ -753,9 +731,13 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                         {
                                             //LogMessage("INFO","looking for GUID replacement");
                                             Guid sourceId = source.Id;
-                                            Guid targetId = _mappings.Find(t => t.sourceId == source.Id).targetId;
-                                            source.Id = targetId;
-                                            guidsToUpdate.Add(new KeyValuePair<string, object>(attribute.Key, source));
+                                            var test = _mappings.Find(t => t.sourceId == source.Id);
+                                            if (test != null) {
+                                                Guid targetId = test.targetId;
+                                                source.Id = targetId;
+                                                guidsToUpdate.Add(new KeyValuePair<string, object>(attribute.Key, source));
+                                            }
+                                            
                                             //LogMessage("INFO",string.Format("replacement found - {0} -> {1}", sourceId, targetId));
                                         }
                                         catch (System.NullReferenceException ex)
@@ -804,54 +786,13 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                         related.Add(new EntityReference { Id = (Guid)attributes[1].Value, LogicalName = entity2logicalname });
 
                                         //the relationship name is the name of the entity we're querying
-                                        //Relationship relationship = new Relationship(entity.LogicalName);
-
-                                        //the relationship name may be different from the name of the intersect entity we're querying
-                                        string NNRelationshipName = null;
-                                        if (ManyManyRelationshipNamesDict.ContainsKey(entity.LogicalName))
-                                        {
-                                            NNRelationshipName = ManyManyRelationshipNamesDict[entity.LogicalName];
-                                        }
-                                        else
-                                        {
-                                            try
-                                            {
-                                                //try to find the correct name of this N:N relationship by querying CRM metadata
-                                                RetrieveEntityRequest entityReq = new RetrieveEntityRequest()
-                                                {
-                                                    LogicalName = entity.LogicalName,
-                                                    EntityFilters = EntityFilters.Relationships
-                                                };
-                                                LogMessage("INFO", "    trying RetrieveEntityRequest");
-                                                RetrieveEntityResponse entityRes = (RetrieveEntityResponse)_targetService.Execute(entityReq);
-                                                LogMessage("INFO", "    got RetrieveEntityResponse");
-
-                                                ManyToManyRelationshipMetadata[] rels = entityRes.EntityMetadata.ManyToManyRelationships;
-                                                foreach (ManyToManyRelationshipMetadata r in rels)
-                                                {
-                                                    if (r.IntersectEntityName == entity.LogicalName)
-                                                    {
-                                                        NNRelationshipName = r.SchemaName;
-                                                        ManyManyRelationshipNamesDict.Add(entity.LogicalName, NNRelationshipName);
-                                                        LogMessage("INFO", "    N:N found relationship schema name: " + NNRelationshipName);
-                                                    }
-                                                }
-                                            }
-                                            catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
-                                            {
-                                                //rethrow the exception so it gets handled in the end catch block
-                                                throw ex;
-                                            }
-                                        }
-
-                                        NNRelationshipName = string.IsNullOrEmpty(NNRelationshipName) ? entity.LogicalName : NNRelationshipName;
-                                        Relationship relationship = new Relationship(NNRelationshipName);
-
+                                        Relationship relationship = new Relationship(entity.LogicalName);
+                                        
                                         try
                                         {
                                             //try the associate
                                             LogMessage("INFO", "    trying target n:n associate");
-                                            _targetService.Associate(entity1logicalname, (Guid)attributes[0].Value, relationship, related);
+                                            _targetClient.Associate(entity1logicalname, (Guid)attributes[0].Value, relationship, related);
                                             LogMessage("INFO", "    target n:n associate ok");
                                         }
                                         catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -887,7 +828,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
 
                                         importoperation = operationTypes.Create;
                                         LogMessage("INFO", "    trying target create only");
-                                        _targetService.Create(entity);
+                                        _targetClient.Create(entity);
                                         LogMessage("INFO", "    create ok");
 
                                     }
@@ -909,7 +850,8 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                             }
                                             importoperation = operationTypes.Update;
                                             LogMessage("INFO", "    trying target update");
-                                            _targetService.Update(entity);
+                                            string test = JsonConvert.SerializeObject(entity, Newtonsoft.Json.Formatting.Indented);
+                                            _targetClient.Update(entity);
                                             LogMessage("INFO", "    update ok");
                                         }
                                         catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -930,7 +872,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                                     importoperation = operationTypes.Create;
                                                     LogMessage("INFO", "    trying target create");
                                                     //if update fails and step is not update-only then try to create
-                                                    _targetService.Create(entity);
+                                                    _targetClient.Create(entity);
                                                     LogMessage("INFO", "    create ok");
                                                 }
                                                 else //if the update failed for any reason other than "does not exist" we have a problem and don't want to try the create step
@@ -972,7 +914,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                                     try
                                                     {
                                                         LogMessage("INFO", "    trying target assignment update");
-                                                        _targetService.Execute(assign);
+                                                        _targetClient.Execute(assign);
                                                         LogMessage("INFO", "    assignment ok");
                                                     }
                                                     catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -999,7 +941,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                                 try
                                                 {
                                                     LogMessage("INFO", "    trying target statecode/statuscode update");
-                                                    _targetService.Execute(setstate);
+                                                    _targetClient.Execute(setstate);
                                                     LogMessage("INFO", "    set statecode/statuscode ok");
                                                 }
                                                 catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -1028,7 +970,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                                     try
                                                     {
                                                         LogMessage("INFO", "    trying target statecode/statuscode update");
-                                                        _targetService.Execute(setstate);
+                                                        _targetClient.Execute(setstate);
                                                         LogMessage("INFO", "    set statecode/statuscode ok");
                                                     }
                                                     catch (FaultException<Microsoft.Xrm.Sdk.OrganizationServiceFault> ex)
@@ -1089,12 +1031,17 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                         //some jsonwriter options
                         //leave out null values - this might cause problems if trying to unset a value, but not sure what the alternative approach would be
                         serializer.NullValueHandling = NullValueHandling.Ignore;
-                        
+
+//TESTING
+serializer.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+//serializer.ContractResolver = new CamelCasePropertyNamesContractResolver();
+
                         //the import will vomit if this isn't "none"
                         serializer.TypeNameHandling = TypeNameHandling.None;
-                        
+
                         //you can change this if you want a more easily readable output file, but this makes for a smaller file size
-                        serializer.Formatting = Newtonsoft.Json.Formatting.None; 
+                        //set to indented to make it easier to run compare against
+                        serializer.Formatting = Newtonsoft.Json.Formatting.Indented; 
 
                         //serialize and save
                         serializer.Serialize(writer, _savedSourceData);
@@ -1165,7 +1112,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                             //if it's an entityreference
                             case "Microsoft.Xrm.Sdk.EntityReference":
                                 jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
-                                EntityReference lookup = new EntityReference((string)jObject["LogicalName"], (Guid)jObject["Id"]);
+                                EntityReference lookup = new EntityReference( (string)jObject["LogicalName"], (Guid)jObject["Id"] );
                                 attributeValue = lookup;
                                 break;
                             //if it's an optionsetvalue
@@ -1173,16 +1120,16 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                                 jObject = (Newtonsoft.Json.Linq.JObject)exportAttribute.AttributeValue;
                                 attributeValue = new OptionSetValue { Value = (int)jObject["Value"] };
                                 break;
-                            //if it's a multiselectoptionset
+                            //if it's an optionsetvaluecollection
                             case "Microsoft.Xrm.Sdk.OptionSetValueCollection":
                                 jArray = (Newtonsoft.Json.Linq.JArray)exportAttribute.AttributeValue;
-
-                                OptionSetValueCollection multiOption = new OptionSetValueCollection { };
-                                foreach (var child in jArray.Children())
-                                {
-                                    multiOption.Add(new OptionSetValue { Value = (int)child["Value"] });
+                                OptionSetValueCollection optionSetValueCollection = new OptionSetValueCollection();
+                                foreach (Newtonsoft.Json.Linq.JToken token in jArray) {
+                                    //var test = token.Value;
+                                    int value = token.Value<int>("Value");
+                                    optionSetValueCollection.Add(new OptionSetValue { Value = value });
                                 }
-                                attributeValue = multiOption;
+                                attributeValue = optionSetValueCollection;
                                 break;
                             //if it's money
                             case "Microsoft.Xrm.Sdk.Money":
@@ -1227,7 +1174,7 @@ namespace AlexanderDevelopment.ConfigDataMover.Lib
                     catch (Exception ex) //if we get an error deserializing, set the attribute value to null and move along - this may not be the behavior you want!
                     {
                         attributeValue = null;
-                        LogMessage("INFO", string.Format("    error deserializing {3} attribute {0} for entity type {1}, id {2}", attributeName, e.LogicalName, e.Id.ToString(), exportAttribute.AttributeType));
+                        LogMessage("INFO", string.Format("    error deserializing {3} attribute {0} for entity type {1}, id {2} : {3}", attributeName, e.LogicalName, e.Id.ToString(), exportAttribute.AttributeType, ex.Message));
                     }
 
                     //add the attribute name and value to the entity's attributes collection

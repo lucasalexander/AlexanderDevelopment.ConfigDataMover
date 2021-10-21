@@ -30,7 +30,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("AlexanderDevelopment.ConfigDataMover.Wpf")]
-[assembly: AssemblyCopyright("Copyright © Lucas Alexander 2015-2020")]
+[assembly: AssemblyCopyright("Copyright © Lucas Alexander 2015-2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -68,4 +68,4 @@ using System.Windows;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2.5.*")]
+[assembly: AssemblyVersion("2.4.*")]

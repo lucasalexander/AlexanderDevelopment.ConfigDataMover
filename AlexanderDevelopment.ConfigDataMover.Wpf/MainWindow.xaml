@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AlexanderDevelopment.ConfigDataMover.Wpf"
         mc:Ignorable="d"
-        Title="Alexander Development Configuration Data Mover" Height="560" Width="750" ResizeMode="CanResize">
+        Title="Alexander Development Configuration Data Mover" Height="635" Width="750" ResizeMode="CanResize">
     <DockPanel>
-        <StatusBar DockPanel.Dock="Bottom">
+        <StatusBar DockPanel.Dock="Bottom" Height="35">
             <StatusBarItem>
-                <Label x:Name="statusLabel"></Label>
+                <Label x:Name="statusLabel" Height="35"></Label>
             </StatusBarItem>
         </StatusBar>
         <Menu Width="Auto" Height="20" DockPanel.Dock="Top">
@@ -38,6 +38,9 @@
                         <StackPanel Orientation="Horizontal">
                             <Button Content="Select target" Width="85" Margin="5" Padding="5" Click="settargetButton_Click"></Button>
                             <Label x:Name="targetLabel" Content="select a target connection . . ." Width="400" Margin="5"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Swap Source/Target" Width="170" Margin="5" Padding="5" Click="swapSourceTargetButton_Click"></Button>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="5">
                             <CheckBox x:Name="saveConnectionsCheckBox" Content="Save connection details?" Margin="2"></CheckBox>

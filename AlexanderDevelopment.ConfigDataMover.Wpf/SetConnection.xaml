@@ -5,23 +5,45 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AlexanderDevelopment.ConfigDataMover.Wpf"
         mc:Ignorable="d"
-        Title="Set connection" Height="283.334" Width="600" ResizeMode="NoResize" ShowInTaskbar="False">
+        Title="Set connection" Height="457.31" Width="600" ResizeMode="NoResize" ShowInTaskbar="False">
     <Grid>
         <StackPanel Orientation="Vertical">
             <GroupBox Header="Connection type">
                 <StackPanel>
-                    <RadioButton Margin="2" Checked="useOauthRadioButton_CheckedChanged" GroupName="connectiontype" x:Name="useOauthRadioButton">D365 / CDS</RadioButton>
+                    <RadioButton Margin="2" Checked="useCrmRadioButton_CheckedChanged" GroupName="connectiontype" x:Name="useCrmRadioButton">Use CRM organization</RadioButton>
                     <RadioButton Margin="2" Checked="useFileRadioButton_CheckedChanged" GroupName="connectiontype" x:Name="useFileRadioButton">Use file</RadioButton>
+                    <RadioButton Margin="2" Checked="useConnectionStringRadioButton_CheckedChanged" GroupName="connectiontype" x:Name="useConnectionStringRadioButton">Use Connection string</RadioButton>
                 </StackPanel>
             </GroupBox>
-            <GroupBox Header="CDS connection string">
+            <GroupBox Header="CRM connection settings">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">
-                        <Label Margin="2" HorizontalAlignment="Left" Width="65">Value</Label>
-                        <TextBox x:Name="oauthTextBox" Margin="2" Height="20" HorizontalAlignment="Left" Width="450"></TextBox>
+                        <Label Margin="2" HorizontalAlignment="Left" Width="65">Server</Label>
+                        <TextBox x:Name="serverTextBox" Margin="2" Height="20" HorizontalAlignment="Left" Width="500"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Margin="2" HorizontalAlignment="Left" Width="65">Domain</Label>
+                        <TextBox x:Name="domainTextBox"  Margin="2" Height="20" HorizontalAlignment="Left" Width="500"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Margin="2" HorizontalAlignment="Left" Width="65">Username</Label>
+                        <TextBox x:Name="usernameTextBox" Margin="2" Height="20" HorizontalAlignment="Left" Width="500"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Margin="2" HorizontalAlignment="Left" Width="65">Password</Label>
+                        <PasswordBox x:Name="passwordTextBox" Margin="2" Height="20" HorizontalAlignment="Left" Width="500" PasswordChar="*"></PasswordBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Margin="2" HorizontalAlignment="Left" Width="65">Auth type</Label>
+                        <ComboBox x:Name="authtypeComboBox" Width="120" Height="20" SelectedValuePath="Content">
+                            <ComboBoxItem Content="AD"/>
+                            <ComboBoxItem Content="IFD"/>
+                            <ComboBoxItem Content="OAuth"/>
+                            <ComboBoxItem Content="Office365"/>
+                        </ComboBox>
                     </StackPanel>
                     <StackPanel>
-                        <Button Padding="2" Content="Test CDS connection" Click="testOauthConnectionButton_Click" x:Name="testOauthConnectionButton" HorizontalAlignment="Left" Margin="69,2" VerticalAlignment="Top"></Button>
+                        <Button Padding="2" Content="Test connection" Click="testConnectionButton_Click" x:Name="testConnectionButton" HorizontalAlignment="Left" Margin="69,2" VerticalAlignment="Top"></Button>
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
@@ -29,14 +51,23 @@
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" Margin="0,0,-0.2,0">
                         <Label Margin="2" HorizontalAlignment="Left" Width="65" Content="File path"/>
-                        <TextBox x:Name="pathTextBox" Margin="2" Height="20" HorizontalAlignment="Left" Width="390"/>
+                        <TextBox x:Name="pathTextBox" Margin="2" Height="20" HorizontalAlignment="Left" Width="444"/>
                         <Button x:Name="selectExistingButton" Content="Browse" Padding="2" Click="fileButton_Click" Margin="10,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" />
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="203,0">
-                <Button Padding="2" Content="Update connection" Click="setConnectionButton_Click" HorizontalAlignment="Left" Margin="0, 10" VerticalAlignment="Top" Width="115"/>
-                <Button Padding="2" Content="Cancel" Click="cancelButton_Click" HorizontalAlignment="Left" Margin="10, 10" VerticalAlignment="Top"/>
+            <GroupBox Header="Connection String settings">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,-0.2,0">
+                        <Label Margin="2" HorizontalAlignment="Left" Width="110" Content="Connection String"/>
+                        <TextBox x:Name="connectionStringTextBox" Margin="2" Height="20" HorizontalAlignment="Left" Width="355"/>
+                        <Button Padding="2" Content="Test connection" Click="testConnectionStringButton_Click" x:Name="testConnectionStringButton" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center"></Button>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Width="240">
+                <Button Padding="2" Content="Update connection" Click="setConnectionButton_Click" HorizontalAlignment="Center" Margin="10, 10" VerticalAlignment="Top" Width="120"/>
+                <Button Padding="2" Content="Cancel" Click="cancelButton_Click" HorizontalAlignment="Center" Margin="10, 10" VerticalAlignment="Top" Width="80"/>
             </StackPanel>
         </StackPanel>
     </Grid>

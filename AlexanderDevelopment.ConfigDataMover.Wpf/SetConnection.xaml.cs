@@ -29,6 +29,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Microsoft.Win32;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Query;
@@ -60,27 +61,48 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                 if (dict.ContainsKey("FILE"))
                 {
                     useFileRadioButton.IsChecked = true;
-                    useOauthRadioButton.IsChecked = false;
+                    useCrmRadioButton.IsChecked = false;
 
-                    clearOAuthParams();
+                    clearCrmConnectionParams();
 
                     pathTextBox.Text = dict["FILE"];
                 }
                 else
                 {
                     useFileRadioButton.IsChecked = false;
-                    useOauthRadioButton.IsChecked = true;
+                    useCrmRadioButton.IsChecked = true;
 
                     clearFileParams();
-                    oauthTextBox.Text = connectionstring;
 
+                    if (dict.ContainsKey("SERVER"))
+                        serverTextBox.Text = dict["SERVER"];
+
+                    if (dict.ContainsKey("URL"))
+                        serverTextBox.Text = dict["URL"];
+
+                    if (dict.ContainsKey("SERVICE URI"))
+                        serverTextBox.Text = dict["SERVICE URI"];
+
+                    if (dict.ContainsKey("USERNAME"))
+                        usernameTextBox.Text = dict["USERNAME"];
+
+                    if (dict.ContainsKey("DOMAIN"))
+                        domainTextBox.Text = dict["DOMAIN"];
+
+                    if (dict.ContainsKey("PASSWORD"))
+                        passwordTextBox.Password = dict["PASSWORD"];
+
+                    if (dict.ContainsKey("AUTHTYPE"))
+                        authtypeComboBox.SelectedValue = dict["AUTHTYPE"];
+
+                    generateConnectionString();
                 }
             }
             else
             {
                 //starting with a blank connection, assume it's to crm
                 useFileRadioButton.IsChecked = false;
-                useOauthRadioButton.IsChecked = true;
+                useCrmRadioButton.IsChecked = true;
 
                 clearFileParams();
             }
@@ -107,14 +129,28 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
             {
                 connectionString = string.Format("file={0}", pathTextBox.Text);
             }
+            else if (useConnectionStringRadioButton.IsChecked.HasValue ? useConnectionStringRadioButton.IsChecked.Value : false)
+            {
+                //just use the connection string we have provided!
+                connectionString = connectionStringTextBox.Text;
+            }
             else
             {
-                connectionString = oauthTextBox.Text;
-                /*if (string.IsNullOrWhiteSpace(oauthTextBox.Text))
+                if (authtypeComboBox.SelectedIndex < 0)
                 {
-                    MessageBox.Show("Must specify connection string.");
+                    MessageBox.Show("Must select auth type.");
                     return;
-                }*/
+
+                }
+                if (validateUrl(serverTextBox.Text))
+                {
+                    connectionString = generateConnectionString();
+                }
+                else
+                {
+                    MessageBox.Show("Server URL is invalid.");
+                    return;
+                }
             }
 
             if (_isSource)
@@ -128,53 +164,157 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
             this.Close();
         }
 
-        private void enableCorrectParams()
-        {
-            clearFileParams();
-            clearOAuthParams();
+        /// <summary>
+        /// Geenerates the connection string from the auth type details provided in the source/target
+        /// </summary>
+        /// <returns></returns>
+        private string generateConnectionString() {
 
-            if (useOauthRadioButton.IsChecked.HasValue ? useOauthRadioButton.IsChecked.Value : false)
+            string connectionString = "";
+
+            if (!string.IsNullOrWhiteSpace(domainTextBox.Text))
             {
-                oauthTextBox.IsReadOnly = false;
+                connectionString = string.Format("url={0};username={1};domain={2};password={3};authtype={4};", serverTextBox.Text, usernameTextBox.Text, domainTextBox.Text, passwordTextBox.Password, authtypeComboBox.SelectedValue);
             }
             else
             {
-                oauthTextBox.IsReadOnly = true;
+                connectionString = string.Format("AuthType={3};Username={1};Password={2};Url={0};", serverTextBox.Text, usernameTextBox.Text, passwordTextBox.Password, authtypeComboBox.SelectedValue);
             }
-            if (useFileRadioButton.IsChecked.HasValue ? useFileRadioButton.IsChecked.Value : false)
+
+            if (authtypeComboBox.SelectedValue.ToString() == "OAuth")
             {
-                pathTextBox.IsReadOnly = false;
-                selectExistingButton.IsEnabled = true;
+                connectionString += "RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97;AppId=51f81489-12ee-4a9e-aaae-a2591f45987d;LoginPrompt=Never;";
             }
             else
             {
-                pathTextBox.IsReadOnly = true;
-                selectExistingButton.IsEnabled = false;
+                connectionString += "RequireNewInstance=true;";
+            }
+
+            connectionStringTextBox.Text = connectionString;
+
+            return connectionString;
+        }
+
+        private void useConnectionStringRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (useConnectionStringRadioButton.IsChecked.HasValue ? useConnectionStringRadioButton.IsChecked.Value : false)
+            {
+                //enable the Connection String
+                enableConnectionStringParams();
+                disableCrmConnectionParams();
+                disableFileParams();
+            }
+            else
+            {
+                clearConnectionStringParams();
+                disableConnectionStringParams();
             }
         }
 
         private void useCrmRadioButton_CheckedChanged(object sender, EventArgs e)
         {
-            enableCorrectParams();
-        }
-
-        private void useOauthRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-            enableCorrectParams();
+            if (useCrmRadioButton.IsChecked.HasValue ? useCrmRadioButton.IsChecked.Value : false)
+            {
+                enableCrmConnectionParams();
+                disableConnectionStringParams();
+                disableFileParams();
+            }
+            else
+            {
+                clearCrmConnectionParams();
+                disableCrmConnectionParams();
+            }
         }
 
         private void useFileRadioButton_CheckedChanged(object sender, EventArgs e)
         {
-            enableCorrectParams();
+            if (useFileRadioButton.IsChecked.HasValue ? useFileRadioButton.IsChecked.Value : false)
+            {
+                enableFileParams();
+                disableCrmConnectionParams();
+                disableConnectionStringParams();
+            }
+            else
+            {
+                disableFileParams();
+                clearFileParams();
+            }
+        }
+
+        
+
+        void clearConnectionStringParams()
+        {
+            connectionStringTextBox.Text = string.Empty;
+        }
+
+        void clearCrmConnectionParams()
+        {
+            serverTextBox.Text = string.Empty;
+            usernameTextBox.Text = string.Empty;
+            domainTextBox.Text = string.Empty;
+            passwordTextBox.Password = string.Empty;
         }
 
         void clearFileParams()
         {
             pathTextBox.Text = string.Empty;
         }
-        void clearOAuthParams()
+
+
+
+        void enableFileParams() {
+            pathTextBox.IsEnabled = true;
+            pathTextBox.IsReadOnly = false;
+            selectExistingButton.IsEnabled = true;
+        }
+
+        void disableFileParams() {
+            pathTextBox.IsEnabled = false;
+            pathTextBox.IsReadOnly = true;
+            selectExistingButton.IsEnabled = false;
+        }
+
+        void enableConnectionStringParams() {
+            connectionStringTextBox.IsReadOnly = false;
+            connectionStringTextBox.IsEnabled = true;
+        }
+
+        void disableConnectionStringParams() {
+            connectionStringTextBox.IsReadOnly = true;
+            connectionStringTextBox.IsEnabled = false;
+        }
+
+        void disableCrmConnectionParams()
         {
-            oauthTextBox.Text = string.Empty;
+            serverTextBox.IsReadOnly = true;
+            usernameTextBox.IsReadOnly = true;
+            domainTextBox.IsReadOnly = true;
+            pathTextBox.IsReadOnly = false;
+
+            serverTextBox.IsEnabled = false;
+            usernameTextBox.IsEnabled = false;
+            domainTextBox.IsEnabled = false;
+            passwordTextBox.IsEnabled = false;
+
+            testConnectionButton.IsEnabled = false;
+            
+        }
+
+        void enableCrmConnectionParams()
+        {
+            serverTextBox.IsReadOnly = false;
+            usernameTextBox.IsReadOnly = false;
+            domainTextBox.IsReadOnly = false;
+            pathTextBox.IsReadOnly = true;
+
+            serverTextBox.IsEnabled = true;
+            usernameTextBox.IsEnabled = true;
+            domainTextBox.IsEnabled = true;
+            passwordTextBox.IsEnabled = true;
+
+            testConnectionButton.IsEnabled = true;
+            
         }
 
         bool validateUrl(string url)
@@ -186,26 +326,17 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
             return result;
         }
 
-        private void testOauthConnectionButton_Click(object sender, EventArgs e)
-        {
-            testOauthConnectionButton.IsEnabled = false;
-            string connectionString = string.Empty;
-            if (string.IsNullOrWhiteSpace(oauthTextBox.Text))
-            {
-                MessageBox.Show("Must specify connection string.");
-                return;
-            }
-            try
-            {
-                connectionString = oauthTextBox.Text;
+        private void runConnectionTest(string connectionString) {
+
+            try {
                 Microsoft.Xrm.Tooling.Connector.TraceControlSettings.TraceLevel = System.Diagnostics.SourceLevels.All;
                 Microsoft.Xrm.Tooling.Connector.TraceControlSettings.AddTraceListener(new System.Diagnostics.TextWriterTraceListener("ConnectionTest.log"));
-
-                IOrganizationService service;
-
                 CrmServiceClient testConnection = new CrmServiceClient(connectionString);
-                service = (IOrganizationService)testConnection.OrganizationWebProxyClient != null ? (IOrganizationService)testConnection.OrganizationWebProxyClient : (IOrganizationService)testConnection.OrganizationServiceProxy;
 
+
+                if (testConnection.LastCrmError != "") {
+                    throw new Exception(string.Format("{0}", testConnection.LastCrmError));
+                }
 
                 string testFetch = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                           <entity name='businessunit'>
@@ -213,43 +344,113 @@ namespace AlexanderDevelopment.ConfigDataMover.Wpf
                             <attribute name='businessunitid' />
                           </entity>
                         </fetch>";
-                EntityCollection buEntities = service.RetrieveMultiple(new FetchExpression(testFetch));
+                EntityCollection buEntities = testConnection.RetrieveMultiple(new FetchExpression(testFetch));
                 if (buEntities.Entities.Count < 1)
                 {
                     throw new Exception("Could not retrieve results from test query.");
                 }
-
                 MessageBox.Show("Validation succeeded");
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 MessageBox.Show(string.Format("Validation failed: {0}", ex.Message));
             }
-            testOauthConnectionButton.IsEnabled = true;
+        
+
+        }
+
+        private void testConnectionStringButton_Click(object sender, RoutedEventArgs e)
+        {
+            testConnectionStringButton.IsEnabled = false;
+            if (connectionStringTextBox.Text.Trim() == "")
+            {
+                MessageBox.Show("Must enter a connection string");
+                return;
+
+            }
+            else 
+            {
+                try
+                {
+                    runConnectionTest(connectionStringTextBox.Text);
+                }
+                catch (Exception ex) {
+                    MessageBox.Show(string.Format("Validation failed: {0}", ex.Message));
+                }
+                
+            }
+
+            testConnectionStringButton.IsEnabled = true;
+        }
+
+        private void testConnectionButton_Click(object sender, EventArgs e)
+        {
+            testConnectionButton.IsEnabled = false;
+            string connectionString = string.Empty;
+            if (authtypeComboBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("Must select auth type.");
+                return;
+
+            }
+
+            if (validateUrl(serverTextBox.Text))
+            {
+                connectionString = generateConnectionString();
+
+                try
+                {
+                    runConnectionTest(connectionString);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(string.Format("Validation failed: {0}", ex.Message));
+                }
+            }
+            else
+            {
+                MessageBox.Show("Server URL is invalid.");
+            }
+            testConnectionButton.IsEnabled = true;
         }
 
         private void fileButton_Click(object sender, RoutedEventArgs e)
         {
-            // Create OpenFileDialog 
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            Nullable<bool> result = null;
+            string filename = "";
 
-            // Set filter for file extension and default file extension 
-            dlg.DefaultExt = ".json";
-            dlg.Filter = "JSON Files (*.json)|*.json|TXT Files (*.txt)|*.txt";
-
-
-            // Display OpenFileDialog by calling ShowDialog method 
-            Nullable<bool> result = dlg.ShowDialog();
-
-
+            // Create OpenFileDialog if source, save dialog if target!
+            if (_isSource) {
+                Microsoft.Win32.OpenFileDialog openDlg = new OpenFileDialog();
+                // Set filter for file extension and default file extension 
+                openDlg.DefaultExt = ".json";
+                openDlg.Filter = "JSON Files (*.json)|*.json|TXT Files (*.txt)|*.txt";
+                // Display OpenFileDialog by calling ShowDialog method 
+                result = openDlg.ShowDialog();
+                filename = openDlg.FileName;
+            }
+            else {
+                Microsoft.Win32.SaveFileDialog saveDlg = new SaveFileDialog();
+                // Set filter for file extension and default file extension 
+                saveDlg.DefaultExt = ".json";
+                saveDlg.Filter = "JSON Files (*.json)|*.json|TXT Files (*.txt)|*.txt";
+                // Display OpenFileDialog by calling ShowDialog method 
+                result = saveDlg.ShowDialog();
+                filename = saveDlg.FileName;
+            }
+            
             // Get the selected file name and display in a TextBox 
             if (result == true)
             {
-                // Open document 
-                string filename = dlg.FileName;
                 pathTextBox.Text = filename;
             }
         }
+
+        private void createNewButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        
     }
+
 }
 
